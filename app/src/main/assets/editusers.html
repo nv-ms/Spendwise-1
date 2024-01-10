@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>users</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        body{
+            background-color: #fff;
+        }
+
+        .header{
+            position:fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 2% 0;
+            z-index: 100;
+            background-color:#007AFF;
+            color: white;
+            width: 100%;
+        }
+        .backBtn{
+            width: 50px;
+            z-index: 200;
+            position: fixed;
+            top: 0;
+            margin-top: 7%;
+            margin-left: 3%;
+        }
+
+        .main {
+            margin-top: 30%;
+            margin-bottom: 30%;
+        }
+
+        .footer {
+            position:fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            overflow: hidden;
+            text-align: center;
+            padding: 20px;
+            z-index: 100;
+            background: rgb(255,255,255);
+        }
+
+        .title{
+            text-align: center;
+            margin-left: 15%;
+            z-index: 1;
+        }
+
+        .userButton{
+            margin:5px;
+            height: 20%;
+            padding:20px;
+            background-color: rgb(0, 6, 90);
+            border-bottom: 1px solid rgb(243, 243, 243);
+            border-radius: 5px;
+            color:#00d7fd;
+            text-align: center;
+            font-size: 20px;
+        }
+        .deleteUser{
+            background-color: #007AFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            width: 50%;
+        }
+        .statusDiv{
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1 class="title">Edit Your Accounts</h1>
+        <img src="leftback.png" alt="" class="backBtn" onclick="window.location.href=`Settings.html?userId=${encodeURIComponent(userId)}`">
+    </header> 
+    <main class="main">
+        <div class="statusDiv" id="statusDiv"></div>
+        <div class="userList" id="userList">
+
+        </div>
+    </main>
+    <div class="footer">
+        <Button type="button" class="deleteUser" id="utilityBtn" onclick="deleteSelectedUsers();">Delete Selected</Button>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = parseInt(urlParams.get('userId'));
+    
+        const statusDiv = document.getElementById('statusDiv');
+        const usersList = document.getElementById('userList');
+        const utilityBtn = document.getElementById('utilityBtn');
+           
+        function displayAllUsers() {
+            const users = javascriptBridge.getAllUsers();
+            const usersArray = JSON.parse(users);
+            usersList.innerHTML = "";
+    
+            for (let i = 0; i < usersArray.length; i++) {
+                const user = usersArray[i];
+                const user_id = user.userId;
+    
+                if (user_id === userId) {
+                    continue;
+                }
+    
+                const userDiv = document.createElement("div");
+                userDiv.classList.add("userButton");
+    
+                const userCheckbox = document.createElement("input");
+                userCheckbox.type = "checkbox";
+                userCheckbox.classList.add("userCheckbox");
+                userCheckbox.value = user_id;
+    
+                const usernameLabel = document.createElement("label");
+                usernameLabel.textContent = user.username;
+    
+                userDiv.appendChild(userCheckbox);
+                userDiv.appendChild(usernameLabel);
+                usersList.appendChild(userDiv);
+            }
+        }
+        const checkUsers = () => {
+            const users = javascriptBridge.getAllUsers();
+            const usersArray = JSON.parse(users);
+
+            if (usersArray.length > 0) {
+                return true; 
+            } else {
+                return false;
+            }
+        }
+
+    
+        function deleteSelectedUsers(initiatingUserId) {
+            const checkboxes = document.getElementsByClassName("userCheckbox");
+            const selectedUserIds = Array.from(checkboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => parseInt(checkbox.value));
+
+            if (selectedUserIds.length > 0) {
+                let currentIndex = 0;
+
+                function processNextUser() {
+                    if (currentIndex < selectedUserIds.length) {
+                        const currentUserId = selectedUserIds[currentIndex];
+                        currentIndex++;
+                        const result = javascriptBridge.deleteUser(currentUserId);
+
+                        if (!result) {
+                            statusDiv.textContent = "An error occurred, please try again later.";
+                        } else {
+                            processNextUser();
+                        }
+                    } else {
+                        if(!checkUsers()){
+                            window.location.href = `Settings.html?userId=${userId}`;
+                        }
+                        displayAllUsers();
+                    }
+                }   
+                processNextUser();
+            } else {
+                statusDiv.textContent = "Please select the users to be deleted.";
+            }
+        }
+    
+        window.onload = displayAllUsers;
+    
+        const btnPressed = () => {
+            window.location.href = `Settings.html?userId=${userId}`;
+        }
+    </script>
+    
+</body>
+</html>

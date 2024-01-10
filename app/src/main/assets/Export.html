@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>PDF Generation</title>
+    <style>
+        *{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            text-align: center;
+            
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            display: block;
+            height: 75px;
+            width: 50%;
+            font-size: 20px;
+            margin: 0 auto;
+            padding: 10px 20px;
+            background-color: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        select {
+            margin: 10px;
+            padding: 5px;
+            width: 100%;
+            height: 50px;
+        }
+        .Input{
+            height: 40px;
+            width: 90%;
+            margin-left: 20px;
+            text-align: center;
+        }
+        #endDate{
+            margin-bottom: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generate PDF</h1>
+        <label for="filterBy">Filter By</label>
+        <select id="filterBy">
+            <option value="all">All Time</option>
+            <option value="date">Date Range</option>
+        </select>
+        <div id="dateFilters">
+            <label for="startDate">Start Date</label><br>
+            <input class="Input" type="date" id="startDate"><br>
+            <label for="endDate">End Date</label><br>
+            <input class="Input" type="date" id="endDate"><br>
+        </div>
+        <label for="sortBy">Sort By</label>
+        <select id="sortBy">
+            <option value="date">Date</option>
+            <option value="amount">Amount</option>
+            <option value="name">Name</option>
+        </select>
+        <label for="sortOrder">Sort Order</label>
+        <select id="sortOrder">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+        </select>
+        <button onclick="exportPDF()">Generate PDF</button>
+    </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = parseInt(urlParams.get('userId'));
+        let transactionList;
+
+        getAllTransactions(userId);
+
+        function getAllTransactions(user_id) {
+            const transactionsJsonString = javascriptBridge.getAllTransactions(user_id);
+            transactionList = JSON.parse(transactionsJsonString); 
+        }
+
+        function exportPDF() {
+            const userData = javascriptBridge.getUserById(userId);
+            const user = JSON.parse(userData);
+            const username = user.username;
+            const userNamePlusID = username + '_' + userId;
+            const formattedTransactions = [];
+
+            const filterBy = document.getElementById('filterBy').value;
+            let startDate, endDate;
+            if (filterBy === 'date') {
+                startDate = document.getElementById('startDate').valueAsNumber;
+                endDate = document.getElementById('endDate').valueAsNumber;
+            }
+
+            const sortedTransactions = transactionList.filter(transaction => {
+                if (filterBy === 'all' || (filterBy === 'date' && transaction.dateAdded >= startDate && transaction.dateAdded <= endDate)) {
+                    return true;
+                }
+                return false;
+            }).sort((a, b) => {
+                const sortBy = document.getElementById('sortBy').value;
+                const sortOrder = document.getElementById('sortOrder').value;
+
+                if (sortBy === 'date') {
+                    return sortOrder === 'asc' ? a.dateAdded - b.dateAdded : b.dateAdded - a.dateAdded;
+                } else if (sortBy === 'amount') {
+                    return sortOrder === 'asc' ? a.amount - b.amount : b.amount - a.amount;
+                } else if (sortBy === 'name') {
+                    const nameA = a.transactionTitle.toLowerCase();
+                    const nameB = b.transactionTitle.toLowerCase();
+                    return sortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+                }
+                return 0;
+            });
+
+            sortedTransactions.forEach(transaction => {
+                const formattedTransaction = {
+                    date: formatDate(transaction.dateAdded),
+                    name: transaction.transactionTitle,
+                    amount: transaction.amount,
+                    description: transaction.description
+                };
+                formattedTransactions.push(formattedTransaction);
+            });
+
+            const pdfData = {
+                appName: 'SpendWise',
+                userName: username,
+                transactions: formattedTransactions
+            };
+
+            javascriptBridge.generatePDF(JSON.stringify(pdfData), `expense_report_${userNamePlusID}`);
+        }
+
+        const btnPressed = () => {
+            window.location.href = `Settings.html?userId=${userId}`;
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(parseInt(timestamp));
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+        const filterBy = document.getElementById('filterBy');
+        const dateFilters = document.getElementById('dateFilters');
+
+        filterBy.addEventListener('change', () => {
+            if (filterBy.value === 'date') {
+                dateFilters.style.display = 'block';
+            } else {
+                dateFilters.style.display = 'none';
+            }
+        });
+
+        // Initially hide date filters
+        dateFilters.style.display = 'none';
+    </script>
+</body>
+</html>

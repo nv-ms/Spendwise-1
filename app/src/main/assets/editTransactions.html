@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>Add Transaction</title>
+    <style>
+        *{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+         body {
+            background-color: #f2f2f2;
+            margin-top: 40%;
+        }
+        .submitForm{
+            margin-left: 15px;
+            position: fixed;
+            width: 80%;
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .transactionName{
+            width: 90%;
+            height:40px;
+            padding: 10px;
+            margin:  5px;
+            margin-left: -10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            background-image: url('tag.png');
+            background-position: 10px 20px;
+            background-repeat: no-repeat;
+            padding-left: 40px;
+            margin-right: 40px;
+        }
+        .transactionAmount{
+            width: 90%;
+            height:40px;
+            padding: 10px;
+            margin:  5px;
+            margin-left: -10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: white;
+            background-image: url('money.png');
+            background-position: 10px 20px;
+            background-repeat: no-repeat;
+            padding-left: 40px;
+            margin-right: 40px;
+        }
+        .transactionDescription{
+            width: 90%;
+            height:40px;
+            padding: 10px;
+            margin:  5px;
+            margin-left: -10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: white;
+            background-image: url('description.png');
+            background-position: 10px 20px;
+            background-repeat: no-repeat;
+            padding-left: 40px;
+            margin-right: 40px;
+        }
+        addTransaction {
+            height: 50px;
+            width: 40%;
+            background-color: #007AFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 20px;
+        }
+        .addTbtn{
+            height: 50px;
+            width: 75%;
+            background-color: #007AFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 20px;
+        }
+        .closeBtn{
+            position: fixed;
+            top: 0%;
+            left: 0;
+            z-index: 5;
+            width: 30px;
+            height: 30px;
+        }
+       
+        .statusDiv{
+            color: red;
+        }
+        
+    </style>
+</head>
+<body>
+    <img src="back.png" alt="" class="closeBtn" onclick="window.location.href=`transactionDetails.html?userId=${encodeURIComponent(userId)}&transactionId=${encodeURIComponent(transactionId)}`">
+
+    <form id="submitForm" class="submitForm">
+        <h2><u>Edit Transaction Details</u></h2>
+        <div class="statusDiv" id="statusDiv"></div>
+        <div class="transactionname">
+            <label for="transactionName">Title</label>
+            <input type="text" name="transactionName" class="transactionName" id="transactionName">
+        </div>
+        <div class="transactionamount">
+            <label for="transactionAmount">Amount</label>
+            <input type="number" name="transactionAmount" id="transactionAmount" class="transactionAmount">
+        </div>
+        <div class="transactiondescription">
+            <label for="transactionDescription">Description</label>
+            <input type="text" name="transactionDescription" id="transactionDescription" class="transactionDescription">
+        </div>
+        <div class="addTransaction">
+            <button type="button" id="submitButton" class="addTbtn" onclick="updateTransaction();">Update Transaction</button>
+        </div>
+        
+    </form>
+    <script>
+       function getUrlParameter(name) {
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(window.location.href);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        const userId = getUrlParameter("userId");
+        const transactionId = getUrlParameter("transactionId");
+
+        const statusDiv = document.getElementById('statusDiv');
+        let transaction;
+
+        function getTransaction(id) {
+            const transactionsJsonString = javascriptBridge.getTransactionById(id);
+            try {
+                transaction = JSON.parse(transactionsJsonString);
+                return transaction;
+                if (typeof transaction !== 'object' || transaction === null) {
+                    console.error("Transaction is not a valid object");
+                    return;
+                }
+            } catch (error) {
+                console.error("Error parsing or processing transaction data:", error);
+            }
+        }
+        const updateTransaction = () => {
+            let title, amount, description;
+
+            const newTitle = document.getElementById("transactionName").value;
+            const newAmount = parseFloat(document.getElementById("transactionAmount").value);
+            const newDescription = document.getElementById("transactionDescription").value;
+
+            const transaction = getTransaction(transactionId);
+
+            const oldTitle = transaction.transactionTitle;
+            const oldAmount = transaction.amount;
+            const oldDescription = transaction.description;
+
+            title = newTitle || oldTitle;
+            amount = isNaN(newAmount) ? oldAmount : newAmount;
+            description = newDescription || oldDescription;
+
+            if (javascriptBridge.updateTransaction(transactionId, title, amount, description)) {
+                window.location.href = `transactionDetails.html?userId=${encodeURIComponent(userId)}&transactionId=${encodeURIComponent(transactionId)}`;
+            } else {
+                statusDiv.textContent = "Failed, try again later";
+            }
+        }
+
+
+        const btnPressed = () => {window.location.href = `transactionDetails.html?userId=${encodeURIComponent(userId)}&transactionId=${encodeURIComponent(transactionId)}`}
+    </script>
+</body>
+</html>

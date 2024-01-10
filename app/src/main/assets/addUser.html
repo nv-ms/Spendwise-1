@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Add User</title>
+    <style>
+        *{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30%;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 300px;
+            margin: 0 auto;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 10px;
+            margin:  5px;
+            margin-left: -10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            background-image: url('name.png');
+            background-position: 3px 6px;
+            background-repeat: no-repeat;
+            padding-left: 40px;
+            margin-right: 40px;
+        }
+
+        button[type="submit"] {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .statusDiv{
+            color: red;
+        }
+
+        
+    </style>
+</head>
+<body>
+    <h1>    </h1>
+    <h2>Add Account</h2>
+    <div class="container">
+        <label for="username">Name:</label><br>
+        <div class="statusDiv" id="statusDiv"></div>
+        <input type="text" id="username" name="username" required><br><br>
+        <button type="submit" onclick="addUser();">Add User</button>
+    </div>
+
+    <script>
+        const addUser=()=>{
+            const username = document.getElementById("username").value;
+            const statusDiv = document.getElementById('statusDiv');
+            if (username) {
+                var isSuccess = javascriptBridge.addUser(username);
+                    if (isSuccess) {
+                        window.location.href = "users.html";
+                    } else {
+                        statusDiv.textContent = "An error ocurred,please try again";
+                    }
+            } else {
+                statusDiv.textContent = "Please enter a valid name";
+            }
+        }
+        
+        const btnPressed = () => {window.location.href = `users.html`}
+    </script>
+</body>
+</html>

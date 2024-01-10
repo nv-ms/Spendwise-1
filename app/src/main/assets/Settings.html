@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Settings</title>
+    <style>
+        *{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0px;
+        }
+        body{
+            background-color: #f1f2ff;
+        }
+        .header{
+            background-color: #007AFF;
+            padding-top: 10%;
+            padding: 5%;
+            margin-bottom: 20%;
+        }
+        h1{
+            color: white;
+            text-align: center;
+        }
+        .backBtn{
+            position: fixed;
+            margin-top: 20px;
+            top: 0;
+            border-radius: 20px;
+            width: 50px;
+        }
+        .footer{
+            background-color: #007AFF;
+            height: 50px;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+        #soptions{
+            text-decoration: line-through;
+        }
+        .sOptions{
+            height: 50px;
+            background-color: #e0e8ff;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 1px 1px 0px 1px rgba(0,0,0,0.1);
+        }
+        .sOptions p{
+            text-align: center;
+            margin-top: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Menu</h1>
+        <img class="backBtn" src="leftback.png" alt="" onclick="window.location.href = `Transactions.html?userId=${encodeURIComponent(userId)}`">
+    </header>
+    <main class="main">
+        <div class="sOptions" onclick="window.location.href = `Export.html?userId=${encodeURIComponent(userId)}`">
+            <p>Export to pdf</p>
+        </div>
+        <div class="sOptions" onclick="window.location.href ='users.html'">
+            <p>Switch Account</p>
+        </div>
+        <div class="sOptions" onclick="window.location.href =`Changepass.html?userId=${encodeURIComponent(userId)}`">
+            <p>Change Password</p>
+        </div>
+        <div class="sOptions" onclick="window.location.href =`changeAccName.html?userId=${encodeURIComponent(userId)}`">
+            <p>Change Account Name</p>
+        </div>
+        <div class="sOptions" onclick="window.location.href =`editusers.html?userId=${encodeURIComponent(userId)}`">
+            <p>Edit Accounts</p>
+        </div>
+        <div class="sOptions" onclick="ClearTransactions(userId);">
+            <p>Clear All Transactions</p>
+        </div>
+        
+    </main>
+    <footer class="footer"></footer>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = parseInt(urlParams.get('userId'));
+
+        const btnPressed = () => {window.location.href = `Transactions.html?userId=${userId}`}
+
+        const ClearTransactions = (user_id) =>{
+            javascriptBridge.confirmDelete(user_id);
+        }
+
+    </script>
+</body>
+</html>

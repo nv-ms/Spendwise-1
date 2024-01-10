@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Change acc Name</title>
+    <style>
+        *{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .header{
+            position:fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 2% 0;
+            z-index: 100;
+            background-color:#007AFF;
+            color: white;
+            width: 100%;
+        }
+        .title{
+            text-align: center;
+            margin-left: 15%;
+            z-index: 1;
+        }
+        .backBtn{
+            width: 50px;
+            z-index: 200;
+            position: fixed;
+            top: 0;
+            margin-top: 7%;
+            margin-left: 3%;
+        }
+        .password-container {
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        #usernameInput {
+            text-align: center;
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007AFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .statusDiv{
+            color:red;
+        }
+    </style>
+</head>
+<body>
+    </head>
+    <body>
+        <header class="header">
+            <h1 class="title">Change account username</h1>
+            <img src="leftback.png" alt="" class="backBtn" onclick="window.location.href=`Settings.html?userId=${encodeURIComponent(userId)}`">
+        </header> 
+        <div class="password-container">
+            <h1>Change Account Name</h1>
+            <div class="statusDiv" id="statusDiv"></div>
+            <input type="text" id="usernameInput" placeholder=" New Username" required>
+            <button type="button" id="submitButton">Change username</button>
+        </div>
+    
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = parseInt(urlParams.get('userId'));
+
+            document.getElementById("submitButton").addEventListener("click", function() {
+                const newUsername = document.getElementById("usernameInput").value;
+                if(javascriptBridge.updateUser(userId,newUsername)){
+                    window.location.href = `Settings.html?userId=${encodeURIComponent(userId)}`;
+                }else if(!javascriptBridge.updateUser(userId, newUsername)){
+                    statusDiv.textContent = "Please try again";
+                }
+            });
+            const btnPressed = () => {window.location.href = `Settings.html?userId=${userId}`}
+        </script>
+    </body>
+    </html>
+    

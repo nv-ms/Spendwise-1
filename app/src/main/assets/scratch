@@ -1,0 +1,43 @@
+//first portion contains the ref code, message status
+Ref Code ~ RKQ8GE93PG
+Message ~ status Confirmed
+
+period ~ .
+
+//amount , action(paid,sent)
+Amount ~ Ksh25.00 
+Action ~ sent 
+reciever ~ to 
+
+//reciever details
+first_name ~ NYAMBEKI  
+last_name ~ OKWANI 
+phone ~ 0742718924
+
+//date settings
+date ~ on 
+date ~ 26/11/23 
+time ~ at 
+time ~ 9:24 
+time ~ PM
+
+period ~ . 
+
+//account status
+balance ~ New M-PESA balance is Ksh4,453.73
+
+period ~ .
+
+//transaction fee
+transaction_fee ~ Transaction cost, Ksh0.00
+
+period ~ .
+
+transaction_limit ~ Amount you can transact within the day is 499,760.00
+
+period ~ .
+
+//misc
+reversal_procedure ~ To reverse, foward this message to 456
+
+period ~ .

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>Add Transaction</title>
+    <style>
+        *{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background-color: #f2f2f2;
+            margin-top: 40%;
+        }
+        .submitForm{
+            margin-left: 15px;
+            position: fixed;
+            width: 80%;
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .transactionName{
+            width: 90%;
+            height:40px;
+            padding: 10px;
+            margin:  5px;
+            margin-left: -10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            background-image: url('tag.png');
+            background-position: 10px 20px;
+            background-repeat: no-repeat;
+            padding-left: 40px;
+            margin-right: 40px;
+        }
+        .transactionAmt{
+            width: 90%;
+            height:40px;
+            padding: 10px;
+            margin:  5px;
+            margin-left: -10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            background-image: url('money.png');
+            background-position: 10px 20px;
+            background-repeat: no-repeat;
+            padding-left: 40px;
+            margin-right: 40px;
+        }
+        .transFee{
+            width: 90%;
+            height:40px;
+            padding: 10px;
+            margin:  5px;
+            margin-left: -10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            background-image: url('money.png');
+            background-position: 10px 20px;
+            background-repeat: no-repeat;
+            padding-left: 40px;
+            margin-right: 40px;
+        }
+        
+        .transactionDescription{
+            text-align: center;
+            width: 90%;
+            height:40px;
+            padding: 10px;
+            margin:  5px;
+            margin-left: -10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: white;
+            background-image: url('description.png');
+            background-position: 10px 20px;
+            background-repeat: no-repeat;
+            padding-left: 40px;
+            margin-right: 40px;
+        }
+        
+       .add{
+            display: flex;
+            justify-content: center;
+       }
+        .mpesa{
+            height: 50px;
+            width: 75%;
+            background-color: #007AFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 20px;
+        }
+        .cash{
+            height: 50px;
+            width: 75%;
+            background-color: #007AFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 20px;
+            display: none;
+        }
+        .others{
+            height: 50px;
+            width: 75%;
+            background-color: #007AFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 20px;
+            display: none;
+        }
+        .attachment{
+            width: 90%;
+            height:40px;
+            padding: 10px;
+            margin:  5px;
+            margin-left: -10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            background-position: 10px 20px;
+            background-repeat: no-repeat;
+            padding-left: 40px;
+            margin-right: 40px;
+        }
+        .closeBtn{
+            position: fixed;
+            top: 0%;
+            left: 0;
+            z-index: 5;
+            width: 30px;
+            height: 30px;
+        }
+       
+        .statusDiv{
+            color: red;
+        }
+        .transactionType{
+            width: 100%;
+            align-items: center;
+        }
+        .ttype{
+            align-self: center;
+            width: 90%;
+            height:40px;
+            padding: 10px;
+            margin:  5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .ssidInput{
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .ssid{
+            align-self: center;
+            width: 90%;
+            height:30px;
+            padding: 10px;
+            margin:  5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .spinner{
+            display:none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+        .loader {
+            top: 50%;
+            left: 50%;
+            font-size: 10px;
+            width: 1em;
+            height: 1em;
+            border-radius: 50%;
+            position: fixed;
+            text-indent: -9999em;
+            animation: mulShdSpin .7s infinite ease;
+            transform: translateZ(0);
+            z-index: 2000;
+        }
+        
+        @keyframes mulShdSpin {
+            0%,
+            100% {
+                box-shadow: 0em -2.6em 0em 0em #ffffff, 1.8em -1.8em 0 0em rgba(255,255,255, 0.2), 2.5em 0em 0 0em rgba(255,255,255, 0.2), 1.75em 1.75em 0 0em rgba(255,255,255, 0.2), 0em 2.5em 0 0em rgba(255,255,255, 0.2), -1.8em 1.8em 0 0em rgba(255,255,255, 0.2), -2.6em 0em 0 0em rgba(255,255,255, 0.5), -1.8em -1.8em 0 0em rgba(255,255,255, 0.7);
+            }
+            12.5% {
+                box-shadow: 0em -2.6em 0em 0em rgba(255,255,255, 0.7), 1.8em -1.8em 0 0em #ffffff, 2.5em 0em 0 0em rgba(255,255,255, 0.2), 1.75em 1.75em 0 0em rgba(255,255,255, 0.2), 0em 2.5em 0 0em rgba(255,255,255, 0.2), -1.8em 1.8em 0 0em rgba(255,255,255, 0.2), -2.6em 0em 0 0em rgba(255,255,255, 0.2), -1.8em -1.8em 0 0em rgba(255,255,255, 0.5);
+            }
+            25% {
+                box-shadow: 0em -2.6em 0em 0em rgba(255,255,255, 0.5), 1.8em -1.8em 0 0em rgba(255,255,255, 0.7), 2.5em 0em 0 0em #ffffff, 1.75em 1.75em 0 0em rgba(255,255,255, 0.2), 0em 2.5em 0 0em rgba(255,255,255, 0.2), -1.8em 1.8em 0 0em rgba(255,255,255, 0.2), -2.6em 0em 0 0em rgba(255,255,255, 0.2), -1.8em -1.8em 0 0em rgba(255,255,255, 0.2);
+            }
+            37.5% {
+                box-shadow: 0em -2.6em 0em 0em rgba(255,255,255, 0.2), 1.8em -1.8em 0 0em rgba(255,255,255, 0.5), 2.5em 0em 0 0em rgba(255,255,255, 0.7), 1.75em 1.75em 0 0em #ffffff, 0em 2.5em 0 0em rgba(255,255,255, 0.2), -1.8em 1.8em 0 0em rgba(255,255,255, 0.2), -2.6em 0em 0 0em rgba(255,255,255, 0.2), -1.8em -1.8em 0 0em rgba(255,255,255, 0.2);
+            }
+            50% {
+                box-shadow: 0em -2.6em 0em 0em rgba(255,255,255, 0.2), 1.8em -1.8em 0 0em rgba(255,255,255, 0.2), 2.5em 0em 0 0em rgba(255,255,255, 0.5), 1.75em 1.75em 0 0em rgba(255,255,255, 0.7), 0em 2.5em 0 0em #ffffff, -1.8em 1.8em 0 0em rgba(255,255,255, 0.2), -2.6em 0em 0 0em rgba(255,255,255, 0.2), -1.8em -1.8em 0 0em rgba(255,255,255, 0.2);
+            }
+            62.5% {
+                box-shadow: 0em -2.6em 0em 0em rgba(255,255,255, 0.2), 1.8em -1.8em 0 0em rgba(255,255,255, 0.2), 2.5em 0em 0 0em rgba(255,255,255, 0.2), 1.75em 1.75em 0 0em rgba(255,255,255, 0.5), 0em 2.5em 0 0em rgba(255,255,255, 0.7), -1.8em 1.8em 0 0em #ffffff, -2.6em 0em 0 0em rgba(255,255,255, 0.2), -1.8em -1.8em 0 0em rgba(255,255,255, 0.2);
+            }
+            75% {
+                box-shadow: 0em -2.6em 0em 0em rgba(255,255,255, 0.2), 1.8em -1.8em 0 0em rgba(255,255,255, 0.2), 2.5em 0em 0 0em rgba(255,255,255, 0.2), 1.75em 1.75em 0 0em rgba(255,255,255, 0.2), 0em 2.5em 0 0em rgba(255,255,255, 0.5), -1.8em 1.8em 0 0em rgba(255,255,255, 0.7), -2.6em 0em 0 0em #ffffff, -1.8em -1.8em 0 0em rgba(255,255,255, 0.2);
+            }
+            87.5% {
+                box-shadow: 0em -2.6em 0em 0em rgba(255,255,255, 0.2), 1.8em -1.8em 0 0em rgba(255,255,255, 0.2), 2.5em 0em 0 0em rgba(255,255,255, 0.2), 1.75em 1.75em 0 0em rgba(255,255,255, 0.2), 0em 2.5em 0 0em rgba(255,255,255, 0.2), -1.8em 1.8em 0 0em rgba(255,255,255, 0.5), -2.6em 0em 0 0em rgba(255,255,255, 0.7), -1.8em -1.8em 0 0em #ffffff;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="spinner" id="spinner">
+        <div class="loader"></div>
+    </div>
+    <img src="back.png" alt="" class="closeBtn" onclick="window.location.href=`Transactions.html?userId=${encodeURIComponent(userId)}`">
+
+    <form id="submitForm" class="submitForm">
+        <h2><u>Add Your Transactions</u></h2>
+        <div class="statusDiv" id="statusDiv"></div>
+        <div class="transactionType">
+            <p>Select The Transaction Type</p>
+            <select name="transactionType" class="ttype" id="transactionType">
+                <option value="mpesa">Mpesa</option>
+                <option value="cash">Cash</option>
+                <option value="offers">Other Offers</option>
+            </select>
+        </div>
+        <div class="transactionname">
+            <label for="transactionName">Title</label>
+            <input type="text" name="transactionName" class="transactionName" id="transactionName" required>
+        </div>
+        <div class="cashDiv" id="cashDiv" style="display: none;">
+            <div class="amountDiv" id="amountDiv">
+                <label for="transactionAmt">Amount</label>
+                <input type="number" class="transactionAmt" name="transactionAmt" id="transactionAmt">
+            </div>
+            <div class="transactionFee" id="transactionFee">
+                <label for="transFee">Incurred Cost</label>
+                <input type="number" class="transFee" name="transFee" id="transFee">
+            </div>
+        </div>
+        <div class="transactiondescription">
+            <label for="transactionDescription">Description</label>
+            <input type="text" name="transactionDescription" id="transactionDescription" class="transactionDescription" placeholder="(Optional) Any details you'd like to add">
+        </div>
+        <div class="tAttachment">
+            <label for="attachment">(optional)File attachment (receipt . . . etc)</label>
+            <input type="file" class="attachment" name="attachment" id="attachment">
+        </div>
+            <!-- for the case of other offers with ussd code-->
+        <div class="ssidInput" id="ssidInput" style="display: none;">
+            <label for="ssid">Enter the offer ssid</label>
+            <input type="number" class="ssid" id="ssid" placeholder="eg. *444#" autocomplete="off">
+        </div>
+
+        <div class="add">
+            <button class="mpesa" id="submitButton" type="button" onclick="sendSSID('*334#');">Add Transaction</button>
+            <button class="cash" id="cashBtn" type="button" onclick="addCashTransaction()">Add Transaction</button>
+            <button class="others" id="others" type="button" onclick="obtainSSID();">Add Transaction</button>
+        </div>
+
+    </form>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = parseInt(urlParams.get('userId'));
+        const spinner = document.getElementById('spinner');
+        const statusDiv = document.getElementById('statusDiv');
+
+        const transactionTypeSelect = document.getElementById('transactionType');
+        const hiddenMenu = document.getElementById('ssidInput');
+        const hiddenBtn = document.getElementById('others');
+        const normBtn = document.getElementById('submitButton');
+
+        const cashDiv = document.getElementById('cashDiv');
+        const amountdiv = document.getElementById('amountDiv');
+        const cashBtn = document.getElementById("cashBtn");
+
+        const toggleElements = (action, element) =>{
+            switch (action) {
+                case "open":
+                    element.style.display = "block";
+                    break;
+                case "close":
+                    element.style.display = "none";
+            }
+        }
+
+        transactionTypeSelect.addEventListener('change', function () {
+            switch (transactionTypeSelect.value) {
+                case "mpesa" : 
+                    toggleElements("open", normBtn);
+                    toggleElements("close", hiddenMenu);
+                    toggleElements("close", hiddenBtn);
+                    toggleElements("close", cashDiv);
+                    toggleElements("close", cashBtn);
+                    break;
+                case "cash" : 
+                    toggleElements("close", normBtn);
+                    toggleElements("close", hiddenMenu);
+                    toggleElements("close", hiddenBtn);
+                    toggleElements("open", cashDiv);
+                    toggleElements("open", cashBtn);
+                    break;
+                case "offers" : 
+                    toggleElements("close", normBtn);
+                    toggleElements("close", amountdiv);
+                    toggleElements("close", cashBtn);
+                    toggleElements("open", hiddenMenu);
+                    toggleElements("open", hiddenBtn);
+                break;
+            }
+        });
+    
+        const sendSSID = (ussd) => {
+            const title = document.getElementById("transactionName").value;
+            if (!title) {
+                statusDiv.textContent = "Please Enter the name of your transaction";
+            } else {
+                javascriptBridge.sendUSSD(ussd);
+                spinner.style.display = 'block';
+            }
+        }
+    
+        const receivedSMS = (message) => {
+            spinner.style.display = 'none';
+            addTransaction(message);
+        }
+
+        const addCashTransaction=()=>{
+            const title = document.getElementById("transactionName").value;
+            const amount = parseFloat(document.getElementById("transactionAmt").value);
+            const transactionCost = document.getElementById("transFee").value;
+            const description = document.getElementById("transactionDescription").value;
+            const attachment = document.getElementById("attachment").value;
+            const refDescription = "Cash Transaction";
+
+            if (javascriptBridge.addTransaction(title, userId, amount, transactionCost ,description, refDescription)) {
+                spinner.style.display = 'none';
+                window.location.href = `Transactions.html?userId=${encodeURIComponent(userId)}`;
+            } else {
+                statusDiv.textContent = "Failed, try again later";
+            }
+        }
+
+        const addTransaction = (descriptionDetails) => {
+            const title = document.getElementById("transactionName").value;
+            const description = document.getElementById("transactionDescription").value;
+            const amount = parseFloat(breakMessage(descriptionDetails).amount);
+            const transactionCost = parseFloat(breakMessage(descriptionDetails).transactionCost);
+            const sentDescription = description;
+            const refDescription = descriptionDetails;
+    
+            if (javascriptBridge.addTransaction(title, userId, amount, transactionCost ,sentDescription, refDescription)) {
+                spinner.style.display = 'none';
+                window.location.href = `Transactions.html?userId=${encodeURIComponent(userId)}`;
+            } else {
+                statusDiv.textContent = "Failed, try again later";
+            }
+        }
+        function breakMessage(message) {
+            const regex = /Ksh([\d,.]+).*Transaction cost, Ksh([\d,.]+)/i;
+            const matches = message.match(regex);
+
+            if (matches) {
+                const amount = parseFloat(matches[1].replace(/,/g, ''));
+                const transactionCost = parseFloat(matches[2].replace(/,/g, ''));
+                const messageBody = {
+                    amount:amount,
+                    transactionCost:transactionCost
+                }
+                return messageBody;
+            } else {
+                return null;
+            }
+        }
+
+        const obtainSSID = ()=>{
+            const rawinput = document.getElementById('ssid').value;
+            const finInput = '*' + rawinput + '#';
+            sendSSID(finInput);
+        }
+    
+        const btnPressed = () => {
+            window.location.href = `Transactions.html?userId=${userId}`;
+        }
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>newPass</title>
+    <style>
+        *{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            text-align: center;
+        }
+        body {
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .password-container {
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007AFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        p {
+            font-size: 14px;
+            color: #777;
+        }
+        .statusDiv{
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    </head>
+    <body>
+        <div class="password-container">
+            <h1>Set New Password</h1>
+            <p>Please set a new password for your account.</p>
+            <div class="statusDiv" id="statusDiv"></div>
+            <input type="password" id="newPasswordInput" placeholder="Enter new password" required >
+            <input type="password" id="confirmPasswordInput" placeholder="Confirm new password"required>
+            <button type="button" id="submitButton" onclick = "createPass();">Save</button>
+        </div>
+    
+        <script>
+            const createPass = () =>{
+                const newPassword = document.getElementById("newPasswordInput").value;
+                const confirmPassword = document.getElementById("confirmPasswordInput").value;
+                const statusDiv = document.getElementById('statusDiv');
+                if (newPassword === confirmPassword) {
+                    javascriptBridge.createPassword(newPassword);
+                    window.location.href = "file:///android_asset/addUser.html";
+                } else {
+                    statusDiv.textContent = "Passwords do not match";
+                    //window.location.reload();
+                }
+            }
+            
+            function btnPressed() {javascriptBridge.showExitDialog();}
+    </script>
+</body>
+</html>
+    
