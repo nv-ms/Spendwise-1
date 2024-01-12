@@ -38,7 +38,9 @@ public class Transaction {
     public String getTransactionTitle() {
         return transactionTitle;
     }
-    public void setTransactionTitle(String transactionTitle) { this.transactionTitle = transactionTitle; }
+    public void setTransactionTitle(String transactionTitle) {
+        this.transactionTitle = transactionTitle;
+    }
 
     public int getUserId() {
         return userId;

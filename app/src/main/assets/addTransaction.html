@@ -81,6 +81,7 @@
             background-color: white;
             background-image: url('description.png');
             background-position: 10px 20px;
+            background-size: 20px;
             background-repeat: no-repeat;
             padding-left: 40px;
             margin-right: 40px;
@@ -190,6 +191,48 @@
             background-color: rgba(0, 0, 0, 0.8);
             z-index: 1000;
         }
+        .tAttachment{
+            width: 90%;
+            margin: 5px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid gray;
+            border-radius: 5px;
+        }
+        .imgContainer{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .image{
+            border-radius: 5px;
+            margin: 2px;
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+        .attachmentBtn{
+            display: flex;
+            justify-content: space-between;
+        }
+        .fileBtn{
+            width: 20px;
+            height: 20px;
+            border: none;
+            background-image: url('upload.png');
+            background-size: cover;
+            background-color: white;
+        }
+        .clearBtn{
+            display: none;
+            border: none;
+            background-image: url('cancel.png');
+            background-size: cover;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+        }
         .loader {
             top: 50%;
             left: 50%;
@@ -269,8 +312,12 @@
             <input type="text" name="transactionDescription" id="transactionDescription" class="transactionDescription" placeholder="(Optional) Any details you'd like to add">
         </div>
         <div class="tAttachment">
-            <label for="attachment">(optional)File attachment (receipt . . . etc)</label>
-            <input type="file" class="attachment" name="attachment" id="attachment">
+            <div class="attachmentBtn">
+                <button type="button" onclick="openFiePicker()" class="fileBtn" id="uploadBtn"></button>
+                <button type="button" onclick="clearSelection();" class="clearBtn" id="clearBtn"></button>
+            </div>
+            <div class="imgContainer" id="imageContainer"></div>
+            <button type="button" onclick="saveImage()">Save</button>
         </div>
             <!-- for the case of other offers with ussd code-->
         <div class="ssidInput" id="ssidInput" style="display: none;">
@@ -299,6 +346,8 @@
         const cashDiv = document.getElementById('cashDiv');
         const amountdiv = document.getElementById('amountDiv');
         const cashBtn = document.getElementById("cashBtn");
+        const clearBtn = document.getElementById('clearBtn');
+        const uploadBtn = document.getElementById('uploadBtn')
 
         const toggleElements = (action, element) =>{
             switch (action) {
@@ -404,11 +453,35 @@
             const finInput = '*' + rawinput + '#';
             sendSSID(finInput);
         }
-    
+        
+        const openFiePicker = ()=>{
+            javascriptBridge.openFilePicker();
+        }
+
+        function saveImage() {
+            imagePath = javascriptBridge.getImagePath();
+            javascriptBridge.saveImage(imagePath);
+        }
+        function handleSelectedFile(filePath) {
+            var img = document.createElement("img");
+            img.classList.add('image')
+            img.src = filePath;
+            img.alt = "Selected Image";
+
+            const container = document.getElementById("imageContainer");
+            container.appendChild(img);
+            toggleElements('open', clearBtn);
+            toggleElements('close', uploadBtn)
+        }
+        const clearSelection =()=>{
+            const container = document.getElementById("imageContainer");
+            container.innerHTML = " ";
+            toggleElements('close', clearBtn);
+            toggleElements('open', uploadBtn);
+        }
         const btnPressed = () => {
             window.location.href = `Transactions.html?userId=${userId}`;
         }
     </script>
-    
 </body>
 </html>

@@ -9,10 +9,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricPrompt;
@@ -21,6 +26,16 @@ import androidx.core.content.ContextCompat;
 import android.content.pm.PackageManager;
 import android.Manifest;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+
 public class MainActivity extends AppCompatActivity {
     private static final int PDF_GENERATION_REQUEST_CODE = 2364;
     public String pdfContent;
@@ -28,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int SMS_PERMISSION_REQUEST_CODE = 123;
     private static final int PHONE_CALL_PERMISSION_REQUEST_CODE = 321;
     private static final int FILE_PICKER_REQUEST_CODE = 123;
+    private ActivityResultLauncher<Intent> filePickerLauncher;
+    public static String imagePath;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -35,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         WebView webView = findViewById(R.id.webview);
+
         webView.clearCache(true);
         webView.setWebViewClient(new WebViewClient());
         WebSettings webSettings = webView.getSettings();
@@ -43,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webView.setWebChromeClient(new WebChromeClient());
         JavascriptBridge javascriptBridge = new JavascriptBridge(this,this, this);
-        javascriptBridge.setMainActivity(this);
         webView.addJavascriptInterface(javascriptBridge, "javascriptBridge");
         AppDatabase db = AppDatabase.getInstance(this);
         passwordDao = db.passwordDao();
@@ -51,8 +68,8 @@ public class MainActivity extends AppCompatActivity {
             Password existingPassword = passwordDao.getPassword();
             runOnUiThread(() -> {
                 if (existingPassword != null) {
-                    webView.loadUrl("file:///android_asset/password.html");
-                    authenticateWithFingerprint();
+                    webView.loadUrl("file:///android_asset/addTransaction.html");
+                   // authenticateWithFingerprint();
                 } else {
                     webView.loadUrl("file:///android_asset/newPass.html");
                 }
@@ -62,6 +79,30 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, SMS_PERMISSION_REQUEST_CODE);
         } else {
             registerSmsReceiver();
+        }
+
+        filePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri selectedFileUri = result.getData().getData();
+                        if (selectedFileUri != null) {
+                            String filePath = String.valueOf(selectedFileUri);
+                            imagePath = filePath;
+                            String jsCode = "handleSelectedFile('" + filePath + "');";
+                            webView.evaluateJavascript(jsCode, null);
+                        } else {
+                            Log.e("YourTag", "Selected file URI is null");
+                        }
+                    }
+                }
+        );
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PDF_GENERATION_REQUEST_CODE) {
+            PDFGenerator.handleActivityResult(resultCode, data.getData(), pdfContent, this);
         }
     }
     private void registerSmsReceiver() {
@@ -172,11 +213,38 @@ public class MainActivity extends AppCompatActivity {
     public void setPdfContent(String content) {
         pdfContent = content;
     }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PDF_GENERATION_REQUEST_CODE) {
-            PDFGenerator.handleActivityResult(resultCode, data.getData(), pdfContent, this);
+
+    public void openFilePicker() {
+        runOnUiThread(() -> {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("image/*");
+                filePickerLauncher.launch(intent);
+        });
+    }
+    public void saveImageToDirectory(String imagePath, String imageName) {
+        File imageDirectory = new File(getExternalFilesDir(null), "images");
+        if (!imageDirectory.exists()) {
+            imageDirectory.mkdirs();
+        }
+        String fileName = "image_" + imageName + ".jpg";
+        File destinationImageFile = new File(imageDirectory, fileName);
+        try (InputStream in = getContentResolver().openInputStream(Uri.parse(imagePath));
+             OutputStream out = Files.newOutputStream(destinationImageFile.toPath())) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+            Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
         }
     }
+    public static String getImagePath(){
+        return imagePath;
+    }
 }
+
+

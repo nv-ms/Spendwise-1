@@ -37,6 +37,7 @@
             padding: 10px;
         }
         .searchBtn{
+            display: none;
             background-image: url('search.png');
             background-repeat: no-repeat;
             background-size: cover;
@@ -55,6 +56,7 @@
             margin: 5px;
         }
         .tabs{
+            display: none;
             position: fixed;
             z-index: 5000;
             top: 0;
@@ -94,7 +96,7 @@
         }
         .main{
             position: relative;
-            margin-top: 130px;
+            margin-top: 100px;
             z-index: 0;
             width: 100%;
             height: 100vh;
@@ -103,9 +105,10 @@
         .divHead{
             position: fixed;
             width: 100%;
-            margin-top: 130px;
+            margin-top: 90px;
             z-index: 5000;
             top: 0;
+            padding-top: 10px;
             background-color: white;
         }
         .expenditure{
@@ -181,7 +184,7 @@
             <div class="menuBtn" onclick="window.location.href = `Settings.html?userId=${encodeURIComponent(userId)}`"></div>
         </div>
     </div>
-    <div class="tabs">
+    <div class="tabs" style="display: none;">
         <div class="tracedTrans" id="tracedBtn" onclick="switchTab('savedT', 'unsavedT', 'tracedBtn', 'untracedBtn');">
             Saved Transactions
         </div>

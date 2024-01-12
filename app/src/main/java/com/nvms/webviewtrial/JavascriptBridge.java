@@ -8,9 +8,12 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Base64;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.biometric.BiometricPrompt;
@@ -31,8 +34,9 @@ public class JavascriptBridge {
     private final Context context;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Activity activity;
-    private final MainActivity mainActivity;
+    private MainActivity mainActivity;
     private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 123;
+    private final Context mContext;
 
 
     public JavascriptBridge(Activity activity, Context context, MainActivity mainActivity) {
@@ -44,6 +48,7 @@ public class JavascriptBridge {
         passwordDao = db.passwordDao();
         FragmentActivity activity1 = (FragmentActivity) activity;
         this.mainActivity = mainActivity;
+        this.mContext = context;
     }
 
     @JavascriptInterface
@@ -270,17 +275,23 @@ public class JavascriptBridge {
         PDFGenerator.generatePDF(statements, FileName,(Activity) context);
     }
     @JavascriptInterface
-    public void openFilePicker() {
-        MainActivity activity = (MainActivity) mContext;
-        activity.runOnUiThread(() -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*"); // You can set the MIME type according to your requirements
-            activity.startActivityForResult(intent, FILE_PICKER_REQUEST_CODE);
-        });
-    }
-    @JavascriptInterface
     public void toggleBiometrics(){
         mainActivity.authenticateWithFingerprint();
     }
+    @JavascriptInterface
+    public void openFilePicker() {
+        mainActivity.openFilePicker();
+    }
+    @JavascriptInterface
+    public String getImagePath(){
+        return MainActivity.getImagePath();
+    }
+    public void getImageDet(){
+
+    }
+    @JavascriptInterface
+    public void saveImage(String imagePath, String imageName) {
+        ((MainActivity) mContext).saveImageToDirectory(imagePath, imageName);
+    }
+
 }
