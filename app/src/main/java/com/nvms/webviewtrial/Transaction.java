@@ -17,9 +17,11 @@ public class Transaction {
     private String description;
     private String refDescription;
     private long dateAdded;
+    private String imageName;
 
-    public Transaction(String transactionTitle, int userId, long amount, long transactionCost, String description, String refDescription) {
-        this.transactionId = generateGUID();
+
+    public Transaction(String transactionId, String transactionTitle, int userId, long amount, long transactionCost, String description, String refDescription, String imageName) {
+        this.transactionId = transactionId;
         this.transactionTitle = transactionTitle;
         this.userId = userId;
         this.description = description;
@@ -27,6 +29,7 @@ public class Transaction {
         this.amount = amount;
         this.transactionCost = transactionCost;
         this.dateAdded = System.currentTimeMillis();
+        this.imageName = imageName;
     }
     @NonNull
     public String getTransactionId() {
@@ -41,14 +44,12 @@ public class Transaction {
     public void setTransactionTitle(String transactionTitle) {
         this.transactionTitle = transactionTitle;
     }
-
     public int getUserId() {
         return userId;
     }
     public void setUserId(int userId) {
         this.userId = userId;
     }
-
     public long getAmount(){
         return amount;
     }
@@ -56,7 +57,8 @@ public class Transaction {
         this.amount = amount;
     }
     public long getTransactionCost(){
-        return transactionCost;}
+        return transactionCost;
+    }
     public void setTransactionCost(long transactionCost){
         this.transactionCost = transactionCost;
     }
@@ -66,7 +68,6 @@ public class Transaction {
     public void setDescription(String description) {
         this.description = description;
     }
-
     public String getRefDescription(){ return refDescription; }
     public void setRefDescription(String refDescription) { this.refDescription = refDescription; }
     public long getDateAdded() {
@@ -75,7 +76,10 @@ public class Transaction {
     public void setDateAdded(long dateAdded) {
         this.dateAdded = dateAdded;
     }
-    private String generateGUID() {
-        return UUID.randomUUID().toString();
+    public String getImageName(){
+        return imageName;
+    }
+    public void setImageName(String imageName){
+        this.imageName = imageName;
     }
 }

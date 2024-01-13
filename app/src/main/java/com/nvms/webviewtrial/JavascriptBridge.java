@@ -8,15 +8,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Base64;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.biometric.BiometricPrompt;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -26,6 +21,8 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
+
 public class JavascriptBridge {
     private static final Object FILE_PICKER_REQUEST_CODE = 123;
     private final UserDao userDao;
@@ -38,7 +35,6 @@ public class JavascriptBridge {
     private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 123;
     private final Context mContext;
 
-
     public JavascriptBridge(Activity activity, Context context, MainActivity mainActivity) {
         this.activity = activity;
         this.context = context;
@@ -50,7 +46,9 @@ public class JavascriptBridge {
         this.mainActivity = mainActivity;
         this.mContext = context;
     }
-
+    private String generateGUID() {
+        return UUID.randomUUID().toString();
+    }
     @JavascriptInterface
     public boolean addUser(String username) {
         try {
@@ -101,10 +99,18 @@ public class JavascriptBridge {
         }
     }
     @JavascriptInterface
-    public Boolean addTransaction(String transactionTitle, int userId, long Amount, long transactionCost, String description ,String refDescription) {
+    public Boolean addTransaction(String transactionTitle, int userId, long Amount, long transactionCost, String description , String refDescription, String imagePath) {
+        String transactionId = generateGUID();
+        String imageName = "null";
+        if(!Objects.equals(imagePath, "notDefined")){
+            imageName = "image_"+transactionId;
+        }
         try{
-            Transaction newTransaction = new Transaction(transactionTitle, userId, Amount, transactionCost, description, refDescription);
+            Transaction newTransaction = new Transaction(transactionId, transactionTitle, userId, Amount, transactionCost, description, refDescription, imageName);
             transactionDao.addTransaction(newTransaction);
+            if(!Objects.equals(imagePath, "notDefined")){
+                ((MainActivity) mContext).saveImageToDirectory(imagePath, imageName);
+            }
             return true;
         }catch (Exception e){
             e.printStackTrace();
@@ -286,12 +292,9 @@ public class JavascriptBridge {
     public String getImagePath(){
         return MainActivity.getImagePath();
     }
-    public void getImageDet(){
-
-    }
     @JavascriptInterface
-    public void saveImage(String imagePath, String imageName) {
-        ((MainActivity) mContext).saveImageToDirectory(imagePath, imageName);
+    public String getAbsoluteImagePath(){
+        return mainActivity.getAbsoluteImgPath();
     }
 
 }

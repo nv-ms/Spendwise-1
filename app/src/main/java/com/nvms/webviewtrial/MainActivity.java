@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int FILE_PICKER_REQUEST_CODE = 123;
     private ActivityResultLauncher<Intent> filePickerLauncher;
     public static String imagePath;
+    public static String savedImagePath;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -68,8 +69,9 @@ public class MainActivity extends AppCompatActivity {
             Password existingPassword = passwordDao.getPassword();
             runOnUiThread(() -> {
                 if (existingPassword != null) {
-                    webView.loadUrl("file:///android_asset/addTransaction.html");
-                   // authenticateWithFingerprint();
+                    //webView.loadUrl("file:///android_asset/password.html");
+                    //authenticateWithFingerprint();
+                    webView.loadUrl("file:///android_asset/transactionDetails.html");
                 } else {
                     webView.loadUrl("file:///android_asset/newPass.html");
                 }
@@ -80,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             registerSmsReceiver();
         }
-
         filePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -109,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
         BroadcastReceiver smsReceiver = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent) {
+            public void onReceive(Context context, @NonNull Intent intent) {
                 if (Telephony.Sms.Intents.SMS_RECEIVED_ACTION.equals(intent.getAction())) {
                     Bundle bundle = intent.getExtras();
                     if (bundle != null) {
@@ -223,24 +224,33 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     public void saveImageToDirectory(String imagePath, String imageName) {
-        File imageDirectory = new File(getExternalFilesDir(null), "images");
-        if (!imageDirectory.exists()) {
-            imageDirectory.mkdirs();
-        }
-        String fileName = "image_" + imageName + ".jpg";
-        File destinationImageFile = new File(imageDirectory, fileName);
-        try (InputStream in = getContentResolver().openInputStream(Uri.parse(imagePath));
-             OutputStream out = Files.newOutputStream(destinationImageFile.toPath())) {
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = in.read(buffer)) > 0) {
-                out.write(buffer, 0, length);
+        if (imagePath != null || imageName != null) {
+            File imageDirectory = new File(getExternalFilesDir(null), "images");
+            if (!imageDirectory.exists()) {
+                imageDirectory.mkdirs();
             }
-            Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+            String fileName = imageName + ".jpg";
+            File destinationImageFile = new File(imageDirectory, fileName);
+            try (InputStream in = getContentResolver().openInputStream(Uri.parse(imagePath));
+                 OutputStream out = Files.newOutputStream(destinationImageFile.toPath())) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, length);
+                }
+                savedImagePath = destinationImageFile.getAbsolutePath();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+            }
         }
+    }
+    public String getAbsoluteImgPath(){
+        File imageDirectory = new File(getExternalFilesDir(null), "images");
+        if (imageDirectory.exists()) {
+            return imageDirectory.getAbsolutePath();
+        }
+        return null;
     }
     public static String getImagePath(){
         return imagePath;

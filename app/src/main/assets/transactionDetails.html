@@ -3,187 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TDetails</title>
+    <title>Details</title>
     <style>
        * {
             margin: 0;
             padding: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
-
         body {
             background-color: #f4f4f4;
         }
-
-        header {
+        .head{
+            display: flex;
+            flex-direction: column;
             background-color: #007AFF;
-            color: #fff;
+            color: white;
             text-align: center;
-            padding: 20px 0;
-        }
-
-        .header{
-            position: fixed;
-            background-color: #007AFF;
-            border-bottom-left-radius: 75px;
-            border-bottom-right-radius: 75px;
             padding: 5px;
-            width: 100vw;
-            height: 5%;
         }
-
-        .title {
-            font-size: 24px;
+        .menu{
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
         }
         .backBtn{
-            position: fixed;
-            width: 40px;
-            height: 40px;
-            left: 0;
-            margin: 20px;
-            margin-top: 1px;
+            background-image: url('previous.png');
+            object-fit: cover;
+            background-size: cover;
+            width: 30px;
+            height: 30px;
+            padding: 2.5px;
         }
         .editBtn{
-            width: 40px;
-            height: 40px;
-            margin: 5px;
-            border-radius: 5px;
-            position: fixed;
-            right: 0;
-            z-index: 100;
-            margin-right: 20px;
+            background-image: url('edit.png');
+            object-fit: cover;
+            background-size: cover;
+            width: 30px;
+            height: 30px;
+            padding: 2.5px;
         }
-        .main {
-            flex-grow: 1; 
-            max-width: 800px;
+        .main{
+            margin: 30px;
+            display: flex;
+            flex-direction: column;
+            background-color: rgb(241, 241, 241);
+            border-radius: 20px;
+            border: 1px solid rgb(197, 197, 197);
+            padding: 10px;
         }
-
-        .transactionList {
-            background-color: #ececec;
+        .details{
+            background-color: rgb(245, 245, 245);
+            border: 1px solid rgb(80, 80, 80);
+            border-radius: 20px;
+            margin: 10px;
+            padding: 5px;
+        }
+       .thumbnail{
+        align-self: center;
+       }
+        .thumbnailImage{
+            object-fit: cover;
+            width: 200px;
+            height: 200px;
             border-radius: 10px;
-            width: 80%;
-            height: 75vh;
-            margin-top: 20%;
-            margin-left: 5%;
-            margin-bottom: 20px;
-            padding: 20px;
         }
-
-        .itemName {
-            text-align: center;
-            font-size: 40px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            margin-top: 30%;
-            text-decoration: underline;
-        }
-
-        .itemAmount {
-            font-size: 30px;
-            color: #007AFF;
-            margin-top: 10%;
-            width: 100%;
-            text-align: center;
-        }
-        .transactionAmount{
-            text-align: center;
-            margin-top: 5%;
-            width: 100%;
-            font-size: 20px;
-        }
-        .descriptionTitle{
-            margin-top: 5%;
-            text-decoration:underline;
-            text-align: center;
-            font-size: 20px;
-        }
-
-        .itemDescription {
-            font-size: 20px;
-            text-align: center;
-            margin-top: 5%;
-            word-wrap: break-word;
-        }
-        .refTitle{
-            margin-top: 5%;
-            text-decoration:underline;
-            text-align: center;
-            font-size: 20px;
-        }
-
-        .itemDate {
-            font-size: 30px;
-            color: #000000;
+        .deleteBtn{
             position: fixed;
             bottom: 0;
-            margin-bottom: 10%;
-            padding-top: 20px;
-            margin-left: 17%;
-            border-radius: 30px;
-            width: 50%;
-            z-index: 100;
-            text-align: center;
-            background-color:#ececec;
-            height: 75px;
-        }
-        .deletebtnDiv{
-            z-index: 100;
-            background-color: #ff0000d0;
+            right: 0;
+            margin: 10px;
+            border: none;
+            background-color: rgb(255, 0, 0);
             width: 50px;
             height: 50px;
+            background-image: url('delete.png');
+            background-repeat: no-repeat;
             border-radius: 50px;
-            margin-bottom: 6%;
-            margin-right: 1%;
-            right: 0;
-            bottom: 0;
-            position: fixed;
-            padding: 7px;
-        }
-        .deletebtn{
-           margin-left: 20%;
-           margin-top: 20%;
-           width: 30px;
-        }
-
-        footer {
-            position: fixed;
-            bottom: 0;
-            width: 20%;
-            width: 100%;
-            background-color: #007AFF;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            z-index: 100;
+            background-position: 50%;
+            background-size: auto;
         }
         .statusDiv{
             color: red;
+            text-align: center;
         }
-
     </style>
 </head>
 <body>
-    <header>
-        <h1 class="title">Transaction Details</h1>
-    </header>
-    <div class="header">
-        <img src="edit.png" alt="" class="editBtn" onclick="window.location.href = `editTransactions.html?userId=${encodeURIComponent(userId)}&transactionId=${encodeURIComponent(transactionId)}`;
-        ">
-        <img src="leftback.png" alt="" class="backBtn" onclick="window.location.href=`Transactions.html?userId=${userId}`">
+    <div class="head">
+        <div class="title">
+            <h1>Transaction Details</h1>
+        </div>
+        <div class="menu">
+            <div class="backBtn"onclick="window.location.href=`Transactions.html?userId=${userId}`"></div>
+            <div class="dateDiv"><h3 id="transactionDate"></h3></div>
+            <div class="editBtn"onclick="window.location.href = `editTransactions.html?userId=${encodeURIComponent(userId)}&transactionId=${encodeURIComponent(transactionId)}`"></div>
+        </div>
     </div>
-
-    <main class="main" id="main">
-        <div class="statusDiv"></div>
-        <div class="transactionsDiv" id="transactionsDiv"> 
-
+    <div class="main">
+        <div class="statusDiv" id="statusDiv"></div>
+        <div class="transactionName">
+            <h1 class="tName" id="transactionName" style="text-align: center;"></h1>
         </div>
-         
-        <div class="deletebtnDiv">
-            <img src="delete.png" alt="" class="deletebtn" onclick="deleteTransaction(transactionId)">
+        <div class="transactionAmount">
+            <h3><p style="color: #007AFF;" id="transactionAmount"></p></h3></div>
+        <div class="transactionFee">
+            <h3><p id="transactionFee"></p></h3>
         </div>
-    </main>
-    <footer>
-    </footer>
+        <div class="details">
+            <div class="transactionDescription" style="text-align: center;">
+                <h6 style="text-align: center; text-decoration: underline;" id="descriptionTitle"></h6>
+                <p id="transactionDesc"></p>
+            </div>
+            <hr>
+            <div class="transactionReference">
+                <h6 style="text-align: center; text-decoration: underline;">Reference</h6>
+                <p id="transactionRef"> </p> 
+            </div>
+        </div>
+       
+        <div class="thumbnail" id="refImg"></div>
+    </div>
+    <div class="footer">
+        <button type="button" class="deleteBtn" onclick="deleteTransaction(transactionId)"></button>
+    </div>
     <script>
         function getUrlParameter(name) {
             name = name.replace(/[\[\]]/g, "\\$&");
@@ -210,62 +152,44 @@
 
         function getTransaction(id) {
             const transactionsJsonString = javascriptBridge.getTransactionById(id);
+            const transactionName = document.getElementById('transactionName');
+            const transactionAmount = document.getElementById('transactionAmount');
+            const transactionFee = document.getElementById('transactionFee');
+            const descriptionTitle = document.getElementById('descriptionTitle');
+            const transactionDesc = document.getElementById('transactionDesc');
+            const transactionRef = document.getElementById('transactionRef');
+            const transactionDate = document.getElementById('transactionDate');
+            const refImg = document.getElementById('refImg');
+            const imagePath = javascriptBridge.getAbsoluteImagePath();
+            const statusDiv = document.getElementById('statusDiv');
             try {
                 const transaction = JSON.parse(transactionsJsonString);
 
-                const transactionsDiv = document.getElementById("transactionsDiv");
-                transactionsDiv.innerHTML = "";
+                transactionName.textContent = transaction.transactionTitle;
+                transactionAmount.textContent = `Amount: Kes: ${transaction.amount.toFixed(2)}`;
+                transactionFee.textContent = `Fee: Kes: ${transaction.transactionCost.toFixed(2)}`;
 
-                const transactionCard = document.createElement("div");
-                transactionCard.classList.add("transactionList");
-
-                const titleElement = document.createElement("div");
-                titleElement.classList.add("itemName");
-                titleElement.textContent = transaction.transactionTitle;
-
-                const amountElement = document.createElement("div");
-                amountElement.classList.add("itemAmount");
-                amountElement.textContent = `Amount: Kes: ${transaction.amount.toFixed(2)}`;
-
-                const transactionCost = document.createElement("div");
-                transactionCost.classList.add("transactionAmount");
-                transactionCost.textContent = `Fee: Kes: ${transaction.transactionCost.toFixed(2)}`;
-
-                const descriptionTitle = document.createElement("div");
-                descriptionTitle.classList.add("descriptionTitle");
                 if(!transaction.description){
-                    descriptionTitle.textContent = "";
+                    descriptionTitle.innerHTML = "";
                 }else{
                     descriptionTitle.textContent = "Description";
                 }
+                transactionDesc.textContent = transaction.description;
+                transactionRef.textContent = transaction.refDescription;
+                transactionDate.textContent = formatDate(transaction.dateAdded);
 
-                const descriptionElement = document.createElement("div");
-                descriptionElement.classList.add("itemDescription");
-                descriptionElement.textContent = transaction.description;
-               
-                const refTitle = document.createElement("div");
-                refTitle.classList.add("refTitle");
-                refTitle.textContent = "Reference";
-
-                const descriptionPara = document.createElement('div');
-                descriptionPara.classList.add('descriptionPara');
-                descriptionPara.textContent = transaction.refDescription
-
-                const dateElement = document.createElement("div");
-                dateElement.classList.add("itemDate");
-                dateElement.textContent = formatDate(transaction.dateAdded);
-
-                transactionCard.appendChild(titleElement);
-                transactionCard.appendChild(amountElement);
-                transactionCard.appendChild(transactionCost);
-                transactionCard.appendChild(descriptionTitle);
-                transactionCard.appendChild(descriptionElement);
-                transactionCard.appendChild(refTitle);
-                transactionCard.appendChild(descriptionPara);
-                transactionCard.appendChild(dateElement);
-                transactionsDiv.appendChild(transactionCard);
+                const imgPara = document.createElement('img');
+                const imageName = transaction.imageName;
+                if(imageName != "null"){
+                    const imgSrc = imagePath+"/"+imageName+".jpg";
+                    imgPara.classList.add('thumbnailImage');
+                    imgPara.src = imgSrc;
+                    imgPara.alt = "ref Image"
+                    refImg.appendChild(imgPara);
+                }
+                
             } catch (error) {
-                console.error("Error parsing or processing transaction data:", error);
+                console.log(error)
             }
         }
         function formatDate(timestamp) {

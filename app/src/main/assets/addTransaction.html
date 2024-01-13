@@ -317,7 +317,6 @@
                 <button type="button" onclick="clearSelection();" class="clearBtn" id="clearBtn"></button>
             </div>
             <div class="imgContainer" id="imageContainer"></div>
-            <button type="button" onclick="saveImage()">Save</button>
         </div>
             <!-- for the case of other offers with ussd code-->
         <div class="ssidInput" id="ssidInput" style="display: none;">
@@ -349,15 +348,10 @@
         const clearBtn = document.getElementById('clearBtn');
         const uploadBtn = document.getElementById('uploadBtn')
 
-        const toggleElements = (action, element) =>{
-            switch (action) {
-                case "open":
-                    element.style.display = "block";
-                    break;
-                case "close":
-                    element.style.display = "none";
-            }
-        }
+        const toggleElements = (action, element) => {
+            element.style.display = action === "open" ? "block" : "none";
+        };
+
 
         transactionTypeSelect.addEventListener('change', function () {
             switch (transactionTypeSelect.value) {
@@ -403,12 +397,15 @@
         const addCashTransaction=()=>{
             const title = document.getElementById("transactionName").value;
             const amount = parseFloat(document.getElementById("transactionAmt").value);
-            const transactionCost = document.getElementById("transFee").value;
+            const transactionCost = parseFloat(document.getElementById("transFee").value);
             const description = document.getElementById("transactionDescription").value;
-            const attachment = document.getElementById("attachment").value;
             const refDescription = "Cash Transaction";
+            imagePath = javascriptBridge.getImagePath();
+            if (imagePath == undefined){
+                imagePath = "notDefined";
+            }
 
-            if (javascriptBridge.addTransaction(title, userId, amount, transactionCost ,description, refDescription)) {
+            if (javascriptBridge.addTransaction(title, userId, amount, transactionCost ,description, refDescription, imagePath)) {
                 spinner.style.display = 'none';
                 window.location.href = `Transactions.html?userId=${encodeURIComponent(userId)}`;
             } else {
@@ -423,8 +420,12 @@
             const transactionCost = parseFloat(breakMessage(descriptionDetails).transactionCost);
             const sentDescription = description;
             const refDescription = descriptionDetails;
+            imagePath = javascriptBridge.getImagePath();
+            if (imagePath == undefined){
+                imagePath = "notDefined";
+            }
     
-            if (javascriptBridge.addTransaction(title, userId, amount, transactionCost ,sentDescription, refDescription)) {
+            if (javascriptBridge.addTransaction(title, userId, amount, transactionCost ,sentDescription, refDescription, imagePath)) {
                 spinner.style.display = 'none';
                 window.location.href = `Transactions.html?userId=${encodeURIComponent(userId)}`;
             } else {
@@ -456,11 +457,6 @@
         
         const openFiePicker = ()=>{
             javascriptBridge.openFilePicker();
-        }
-
-        function saveImage() {
-            imagePath = javascriptBridge.getImagePath();
-            javascriptBridge.saveImage(imagePath);
         }
         function handleSelectedFile(filePath) {
             var img = document.createElement("img");
