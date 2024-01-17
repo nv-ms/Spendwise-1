@@ -18,9 +18,7 @@ public class Transaction {
     private String refDescription;
     private long dateAdded;
     private String imageName;
-
-
-    public Transaction(String transactionId, String transactionTitle, int userId, long amount, long transactionCost, String description, String refDescription, String imageName) {
+    public Transaction(@NonNull String transactionId, String transactionTitle, int userId, long amount, long transactionCost, String description, String refDescription, String imageName) {
         this.transactionId = transactionId;
         this.transactionTitle = transactionTitle;
         this.userId = userId;

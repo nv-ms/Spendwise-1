@@ -2,133 +2,226 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title>Add Transaction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no" >
+    <title>Edit</title>
     <style>
-        *{
+         *{
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            box-sizing: border-box;
         }
-         body {
-            background-color: #f2f2f2;
-            margin-top: 40%;
+        body {
+            background-color: white;
         }
-        .submitForm{
-            margin-left: 15px;
-            position: fixed;
-            width: 80%;
+        .head{
+            display: flex;
+            flex-direction: column-reverse;
+            width: 100%;
+            background-color: #007aff;
+            color: white;
+            padding: 10px;
+        }
+        .back{
+            background-image: url('previous.png');
+            background-repeat: no-repeat;
+            height: 30px;
+            width: 30px;
+            background-size: cover;
+            align-self: flex-start;
+            padding: 5px;
+        }
+        .title{
+            width: 100%;
             text-align: center;
-            background-color: #fff;
+        }
+        .main{
+            margin: 30px;
             padding: 20px;
+            background-color: rgb(245, 245, 245);
+            border: 1px solid rgb(94, 94, 94);
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .statusDiv{
+            color: red;
+            text-align: center;
+        }
+        .Edit{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
         }
         .transactionName{
-            width: 90%;
-            height:40px;
+            width: 100%;
+            height:50px;
             padding: 10px;
             margin:  5px;
-            margin-left: -10px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            font-size: 16px;
             background-color: white;
             background-image: url('tag.png');
-            background-position: 10px 20px;
+            background-position: 10px 15px;
             background-repeat: no-repeat;
             padding-left: 40px;
-            margin-right: 40px;
         }
         .transactionAmount{
-            width: 90%;
-            height:40px;
+            width: 100%;
+            height:50px;
             padding: 10px;
             margin:  5px;
-            margin-left: -10px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
             background-color: white;
             background-image: url('money.png');
-            background-position: 10px 20px;
+            background-position: 10px 15px;
             background-repeat: no-repeat;
             padding-left: 40px;
-            margin-right: 40px;
         }
-        .transactionDescription{
-            width: 90%;
-            height:40px;
+        .transactionFee{
+            width: 100%;
+            height:50px;
             padding: 10px;
             margin:  5px;
-            margin-left: -10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: white;
+            background-image: url('money.png');
+            background-position: 10px 15px;
+            background-repeat: no-repeat;
+            padding-left: 40px;
+        }
+        .transactionDescription{
+            width: 100%;
+            height:50px;
+            padding: 10px;
+            margin:  5px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
             background-color: white;
             background-image: url('description.png');
-            background-position: 10px 20px;
+            background-position: 10px 10px;
+            background-size: 30px;
             background-repeat: no-repeat;
             padding-left: 40px;
-            margin-right: 40px;
         }
-        addTransaction {
-            height: 50px;
-            width: 40%;
-            background-color: #007AFF;
-            color: #fff;
-            border: none;
+        .tAttachment{
+            width: 100%;
+            margin: 5px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
             border-radius: 5px;
-            padding: 10px 20px;
-            font-size: 20px;
         }
-        .addTbtn{
-            height: 50px;
-            width: 75%;
-            background-color: #007AFF;
-            color: #fff;
-            border: none;
+        .imgContainer{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .image{
             border-radius: 5px;
-            padding: 10px 20px;
-            font-size: 20px;
+            margin: 2px;
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
         }
-        .closeBtn{
-            position: fixed;
-            top: 0%;
-            left: 0;
-            z-index: 5;
+        .attachmentBtn{
+            display: flex;
+            justify-content: space-between;
+        }
+        .fileBtn{
             width: 30px;
             height: 30px;
+            border: none;
+            background-image: url('upload.png');
+            background-size: cover;
+            background-color: rgba(255, 255, 255, 0);
         }
-       
-        .statusDiv{
-            color: red;
+        .clearBtn{
+            display: none;
+            border: none;
+            background-image: url('cancel.png');
+            background-size: cover;
+            width: 20px;
+            height: 20px;
+            background-color: white;
         }
-        
+        .removeBtn{
+            background-color: rgb(255, 68, 68);
+            border: none;
+            width: 160px;
+            height: 40px;
+            border-radius: 5px;
+            color: white;
+            font-size: 15px;
+            align-self: center;
+            display: none;
+        }
+        .footer{
+            display: flex;
+            justify-content: center;
+        }
+        .addTbtn{
+            border: none;
+            background-color: #007aff;
+            color: white;
+            height: 50px;
+            width: 200px;
+            border-radius: 10px;
+            font-size: 20px;
+
+        }
     </style>
 </head>
 <body>
-    <img src="back.png" alt="" class="closeBtn" onclick="window.location.href=`transactionDetails.html?userId=${encodeURIComponent(userId)}&transactionId=${encodeURIComponent(transactionId)}`">
-
-    <form id="submitForm" class="submitForm">
-        <h2><u>Edit Transaction Details</u></h2>
+    <div class="head">
+        <div class="back" onclick="window.location.href=`transactionDetails.html?userId=${encodeURIComponent(userId)}&transactionId=${encodeURIComponent(transactionId)}`"></div>
+        <div class="title"><h1>Edit Transaction</h1></div>
+    </div>
+    <div class="main">
         <div class="statusDiv" id="statusDiv"></div>
-        <div class="transactionname">
+        <div class="Edit">
             <label for="transactionName">Title</label>
             <input type="text" name="transactionName" class="transactionName" id="transactionName">
         </div>
-        <div class="transactionamount">
+        <div class="Edit">
             <label for="transactionAmount">Amount</label>
             <input type="number" name="transactionAmount" id="transactionAmount" class="transactionAmount">
         </div>
-        <div class="transactiondescription">
-            <label for="transactionDescription">Description</label>
-            <input type="text" name="transactionDescription" id="transactionDescription" class="transactionDescription">
+        <div class="Edit">
+            <label for="transactionFee">Transaction Cost</label>
+            <input type="number" name="transactionFee" id="transactionFee" class="transactionFee">
         </div>
-        <div class="addTransaction">
+        <div class="Edit">
+            <div class="Edit">
+                <label for="transactionDescription">Description</label>
+                <input type="text" name="tansactionDescription" id="transactionDescription" class="transactionDescription">
+            </div>
+        </div>
+        <div class="tAttachment">
+            <div class="attachmentBtn">
+                <button type="button" onclick="openFiePicker()" class="fileBtn" id="uploadBtn"></button>
+                <button type="button" onclick="clearSelection();" class="clearBtn" id="clearBtn"></button>
+            </div>
+            <div class="imgContainer" id="imageContainer"></div>
+            <button type="button" class="removeBtn" id="removeBtn" onclick="removeImg()">Remove Existing Image</button>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="update">
             <button type="button" id="submitButton" class="addTbtn" onclick="updateTransaction();">Update Transaction</button>
         </div>
-        
-    </form>
+    </div>
     <script>
-       function getUrlParameter(name) {
+        function getUrlParameter(name) {
             name = name.replace(/[\[\]]/g, "\\$&");
             var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
                 results = regex.exec(window.location.href);
@@ -136,50 +229,94 @@
             if (!results[2]) return '';
             return decodeURIComponent(results[2].replace(/\+/g, " "));
         }
+        const toggleElements = (action, element) => {
+            element.style.display = action === "open" ? "block" : "none";
+        };
 
         const userId = getUrlParameter("userId");
         const transactionId = getUrlParameter("transactionId");
-
+        const transaction = JSON.parse(javascriptBridge.getTransactionById(transactionId));
+        const removeImgBtn = document.getElementById('removeBtn');
         const statusDiv = document.getElementById('statusDiv');
-        let transaction;
+        const container = document.getElementById("imageContainer");
+        let isImageremovable = false;
 
-        function getTransaction(id) {
-            const transactionsJsonString = javascriptBridge.getTransactionById(id);
-            try {
-                transaction = JSON.parse(transactionsJsonString);
-                return transaction;
-                if (typeof transaction !== 'object' || transaction === null) {
-                    console.error("Transaction is not a valid object");
-                    return;
-                }
-            } catch (error) {
-                console.error("Error parsing or processing transaction data:", error);
-            }
+        if(transaction.imageName == "null"){
+            toggleElements('close', removeImgBtn);
+        }else{
+            toggleElements('open', removeImgBtn);
         }
+       
         const updateTransaction = () => {
-            let title, amount, description;
+            let title, amount, fee,description, imagePath, process, reference;
 
             const newTitle = document.getElementById("transactionName").value;
             const newAmount = parseFloat(document.getElementById("transactionAmount").value);
+            const newFee = parseFloat(document.getElementById('transactionFee').value);
             const newDescription = document.getElementById("transactionDescription").value;
-
-            const transaction = getTransaction(transactionId);
 
             const oldTitle = transaction.transactionTitle;
             const oldAmount = transaction.amount;
+            const oldFee = transaction.transactionCost;
             const oldDescription = transaction.description;
+            reference = transaction.refDescription;
+
+            imageName = transaction.imageName;
+            
+            if (imagePath == undefined){
+                imagePath = "notDefined";
+            }
 
             title = newTitle || oldTitle;
             amount = isNaN(newAmount) ? oldAmount : newAmount;
+            fee = isNaN(newFee) ? oldFee : newFee;
             description = newDescription || oldDescription;
 
-            if (javascriptBridge.updateTransaction(transactionId, title, amount, description)) {
+            if(isImageremovable){
+                imageName = "null";
+                process = "delete";
+            }else if(container.children.length == 1){
+                process = "update";
+                imagePath = javascriptBridge.getImagePath();
+            }else{
+                process = "preserve"
+            }
+
+            if(container.children.length <= 0 && imageName == "null"){
+                imagePath = "notDefined";
+            }
+
+            if (javascriptBridge.updateTransaction(transactionId, title, amount, fee, description, reference ,process,imagePath, imageName )) {
                 window.location.href = `transactionDetails.html?userId=${encodeURIComponent(userId)}&transactionId=${encodeURIComponent(transactionId)}`;
             } else {
                 statusDiv.textContent = "Failed, try again later";
             }
         }
+        const removeImg = ()=>{
+            isImageremovable = true;
+            toggleElements('close', removeImgBtn);
+        }
+        const openFiePicker = ()=>{
+            javascriptBridge.openFilePicker();
+        }
+        function handleSelectedFile(filePath) {
+            var img = document.createElement("img");
+            img.classList.add('image')
+            img.src = filePath;
+            img.alt = "Selected Image";
 
+            container.appendChild(img);
+            toggleElements('open', clearBtn);
+            toggleElements('close', uploadBtn);
+            toggleElements('close', removeImgBtn);
+        }
+        const clearSelection =()=>{
+            const container = document.getElementById("imageContainer");
+            container.innerHTML = " ";
+            toggleElements('close', clearBtn);
+            toggleElements('open', uploadBtn);
+            toggleElements('open', removeImgBtn);
+        }
 
         const btnPressed = () => {window.location.href = `transactionDetails.html?userId=${encodeURIComponent(userId)}&transactionId=${encodeURIComponent(transactionId)}`}
     </script>

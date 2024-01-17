@@ -69,9 +69,8 @@ public class MainActivity extends AppCompatActivity {
             Password existingPassword = passwordDao.getPassword();
             runOnUiThread(() -> {
                 if (existingPassword != null) {
-                    //webView.loadUrl("file:///android_asset/password.html");
-                    //authenticateWithFingerprint();
-                    webView.loadUrl("file:///android_asset/transactionDetails.html");
+                    webView.loadUrl("file:///android_asset/password.html");
+                    authenticateWithFingerprint();
                 } else {
                     webView.loadUrl("file:///android_asset/newPass.html");
                 }
@@ -243,6 +242,22 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
                 Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+    public boolean deleteImageFile(String fileName) {
+        File imageDirectory = new File(getExternalFilesDir(null), "images");
+        String fullFileName = fileName + ".jpg";
+        File imageFileToDelete = new File(imageDirectory, fullFileName);
+
+        if (imageFileToDelete.exists()) {
+            boolean deleted = imageFileToDelete.delete();
+            if (deleted) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
         }
     }
     public String getAbsoluteImgPath(){

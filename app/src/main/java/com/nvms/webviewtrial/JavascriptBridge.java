@@ -1,5 +1,7 @@
 package com.nvms.webviewtrial;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -8,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
@@ -31,7 +34,7 @@ public class JavascriptBridge {
     private final Context context;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Activity activity;
-    private MainActivity mainActivity;
+    private final MainActivity mainActivity;
     private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 123;
     private final Context mContext;
 
@@ -134,7 +137,20 @@ public class JavascriptBridge {
         }
     }
     @JavascriptInterface
-    public boolean updateTransaction(String transactionId, String newTitle,long newAmount, long newTransactionCost,String newDescription, String newRefDescription) {
+    public boolean updateTransaction(String transactionId, String newTitle,long newAmount, long newTransactionCost,String newDescription, String newRefDescription,  String imageProcess,String imagePath, String imageName) {
+        System.out.println("Transaction Cost " + newTransactionCost);
+        if(Objects.equals(imageProcess, "delete")){
+            deleteImage(imageName);
+            imageName = "null";
+        }else if(Objects.equals(imageProcess, "update")){
+            deleteImage(imageName);
+            if(!Objects.equals(imagePath, "notDefined")){
+                imageName = "image_"+transactionId;
+                ((MainActivity) mContext).saveImageToDirectory(imagePath, imageName);
+            }else{
+                imageName = "null";
+            }
+        }
         Transaction transaction = transactionDao.getTransactionById(transactionId);
         if (transaction != null) {
             transaction.setTransactionTitle(newTitle);
@@ -142,6 +158,7 @@ public class JavascriptBridge {
             transaction.setTransactionCost(newTransactionCost);
             transaction.setDescription(newDescription);
             transaction.setRefDescription(newRefDescription);
+            transaction.setImageName(imageName);
             transactionDao.updateTransaction(transaction);
         }
         return true;
@@ -295,6 +312,10 @@ public class JavascriptBridge {
     @JavascriptInterface
     public String getAbsoluteImagePath(){
         return mainActivity.getAbsoluteImgPath();
+    }
+    @JavascriptInterface
+    public boolean deleteImage(String imageName){
+        return mainActivity.deleteImageFile(imageName);
     }
 
 }

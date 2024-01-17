@@ -344,6 +344,7 @@
 
         const cashDiv = document.getElementById('cashDiv');
         const amountdiv = document.getElementById('amountDiv');
+        const transFee = document.getElementById('transFee');
         const cashBtn = document.getElementById("cashBtn");
         const clearBtn = document.getElementById('clearBtn');
         const uploadBtn = document.getElementById('uploadBtn')
@@ -361,18 +362,21 @@
                     toggleElements("close", hiddenBtn);
                     toggleElements("close", cashDiv);
                     toggleElements("close", cashBtn);
+                    toggleElements("close", transFee);
                     break;
                 case "cash" : 
                     toggleElements("close", normBtn);
                     toggleElements("close", hiddenMenu);
                     toggleElements("close", hiddenBtn);
                     toggleElements("open", cashDiv);
+                    toggleElements("open", transFee);
                     toggleElements("open", cashBtn);
                     break;
                 case "offers" : 
                     toggleElements("close", normBtn);
                     toggleElements("close", amountdiv);
                     toggleElements("close", cashBtn);
+                    toggleElements("close", transFee);
                     toggleElements("open", hiddenMenu);
                     toggleElements("open", hiddenBtn);
                 break;
@@ -412,7 +416,6 @@
                 statusDiv.textContent = "Failed, try again later";
             }
         }
-
         const addTransaction = (descriptionDetails) => {
             const title = document.getElementById("transactionName").value;
             const description = document.getElementById("transactionDescription").value;
