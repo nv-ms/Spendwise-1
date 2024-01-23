@@ -197,8 +197,60 @@
             padding: 10px;
             display: flex;
             flex-direction: column;
-            border: 1px solid gray;
+            border: none;
             border-radius: 5px;
+        }
+        .attachmentBtn{
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .fileBtn{
+            width: 30px;
+            height: 30px;
+            border: none;
+            background-image: url('upload.png');
+            background-size: cover;
+            background-color: white;
+            display: block;
+        }
+        .iconsDiv{
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            display: none;
+        }
+        .funBtn{
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            height: 50px;
+            align-items: center;
+        }
+        .iconBtn{
+            border: none;
+            width: 30px;
+            height: 30px;
+            margin: 2px;
+            background-color: white;
+        }
+        #cancelIcon{
+            background-image: url('cancel.png');
+            background-size: 20px;
+            background-repeat: no-repeat;
+            align-self: flex-end;
+        }
+        #cameraIcon{
+            background-image: url(camera.png);
+            background-size: 30px;
+            background-repeat: no-repeat;
+            margin: 5px;
+        }
+        #galleryIcon{
+            background-image: url(image.png);
+            background-size: 30px;
+            background-repeat: no-repeat;
+            margin: 5px;
         }
         .imgContainer{
             display: flex;
@@ -212,18 +264,8 @@
             height: 50px;
             object-fit: cover;
         }
-        .attachmentBtn{
-            display: flex;
-            justify-content: space-between;
-        }
-        .fileBtn{
-            width: 20px;
-            height: 20px;
-            border: none;
-            background-image: url('upload.png');
-            background-size: cover;
-            background-color: white;
-        }
+        
+        
         .clearBtn{
             display: none;
             border: none;
@@ -313,12 +355,18 @@
         </div>
         <div class="tAttachment">
             <div class="attachmentBtn">
-                <button type="button" onclick="openFiePicker()" class="fileBtn" id="uploadBtn"></button>
+                <button type="button" onclick="toggleIcons()" class="fileBtn" id="uploadBtn"></button>
+                <div class="iconsDiv" id="iconsDiv">                    
+                    <button type="button" class="iconBtn" id="cancelIcon" onclick="toggleIcons();"></button>
+                    <div class="funBtn">
+                        <button type="button" class="iconBtn" id="cameraIcon" onclick="openFilePicker('camera')"></button>
+                        <button type="button" class="iconBtn" id="galleryIcon" onclick="openFilePicker('galery')"></button>
+                    </div>
+                </div>
                 <button type="button" onclick="clearSelection();" class="clearBtn" id="clearBtn"></button>
             </div>
             <div class="imgContainer" id="imageContainer"></div>
         </div>
-            <!-- for the case of other offers with ussd code-->
         <div class="ssidInput" id="ssidInput" style="display: none;">
             <label for="ssid">Enter the offer ssid</label>
             <input type="number" class="ssid" id="ssid" placeholder="eg. *444#" autocomplete="off">
@@ -347,12 +395,12 @@
         const transFee = document.getElementById('transFee');
         const cashBtn = document.getElementById("cashBtn");
         const clearBtn = document.getElementById('clearBtn');
-        const uploadBtn = document.getElementById('uploadBtn')
+        const uploadBtn = document.getElementById('uploadBtn');
+        const iconsDiv = document.getElementById('iconsDiv');
 
         const toggleElements = (action, element) => {
             element.style.display = action === "open" ? "block" : "none";
         };
-
 
         transactionTypeSelect.addEventListener('change', function () {
             switch (transactionTypeSelect.value) {
@@ -382,22 +430,20 @@
                 break;
             }
         });
-    
-        const sendSSID = (ussd) => {
-            const title = document.getElementById("transactionName").value;
-            if (!title) {
-                statusDiv.textContent = "Please Enter the name of your transaction";
-            } else {
-                javascriptBridge.sendUSSD(ussd);
-                spinner.style.display = 'block';
-            }
-        }
-    
-        const receivedSMS = (message) => {
-            spinner.style.display = 'none';
-            addTransaction(message);
-        }
+        const toggleIcons =()=>{
+            if (window.getComputedStyle) {
+                const computedStyle = window.getComputedStyle(iconsDiv);
+                const displayPropertyValue = computedStyle.getPropertyValue('display');
+                if (displayPropertyValue === 'none') {
+                    toggleElements('open', iconsDiv);
+                    toggleElements('close', uploadBtn);
+                }else if(displayPropertyValue === 'block'){
+                    toggleElements('open', uploadBtn);
+                    toggleElements('close', iconsDiv);
+                }
+            }       
 
+        } 
         const addCashTransaction=()=>{
             const title = document.getElementById("transactionName").value;
             const amount = parseFloat(document.getElementById("transactionAmt").value);
@@ -416,6 +462,23 @@
                 statusDiv.textContent = "Failed, try again later";
             }
         }
+    
+        const sendSSID = (ussd) => {
+            const title = document.getElementById("transactionName").value;
+            if (!title) {
+                statusDiv.textContent = "Please Enter the name of your transaction";
+            } else {
+                javascriptBridge.sendUSSD(ussd);
+                spinner.style.display = 'block';
+            }
+        }
+    
+        const receivedSMS = (message) => {
+            spinner.style.display = 'none';
+            addTransaction(message);
+        }
+
+        
         const addTransaction = (descriptionDetails) => {
             const title = document.getElementById("transactionName").value;
             const description = document.getElementById("transactionDescription").value;
@@ -457,25 +520,25 @@
             sendSSID(finInput);
         }
         
-        const openFiePicker = ()=>{
-            javascriptBridge.openFilePicker();
+        const openFilePicker = (option)=>{
+            javascriptBridge.openFilePicker(option);
         }
         function handleSelectedFile(filePath) {
             var img = document.createElement("img");
             img.classList.add('image')
-            img.src = filePath;
-            img.alt = "Selected Image";
+            img.src = filePath + "/temp.jpeg";
+            //img.alt = "Selected Image";
 
             const container = document.getElementById("imageContainer");
             container.appendChild(img);
             toggleElements('open', clearBtn);
-            toggleElements('close', uploadBtn)
+            toggleElements('close', iconsDiv);
         }
         const clearSelection =()=>{
             const container = document.getElementById("imageContainer");
             container.innerHTML = " ";
             toggleElements('close', clearBtn);
-            toggleElements('open', uploadBtn);
+            toggleElements('open', iconsDiv);
         }
         const btnPressed = () => {
             window.location.href = `Transactions.html?userId=${userId}`;

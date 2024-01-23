@@ -1,12 +1,17 @@
 package com.nvms.webviewtrial;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.util.Log;
@@ -35,6 +40,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private static final int PDF_GENERATION_REQUEST_CODE = 2364;
@@ -46,6 +55,10 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> filePickerLauncher;
     public static String imagePath;
     public static String savedImagePath;
+    private  static String currentOption;
+    private static String tempImagePath;
+    private static String tempPath;
+    private static File tempDirectory;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -69,8 +82,9 @@ public class MainActivity extends AppCompatActivity {
             Password existingPassword = passwordDao.getPassword();
             runOnUiThread(() -> {
                 if (existingPassword != null) {
-                    webView.loadUrl("file:///android_asset/password.html");
-                    authenticateWithFingerprint();
+                    /*webView.loadUrl("file:///android_asset/password.html");
+                    authenticateWithFingerprint();*/
+                    webView.loadUrl("file:///android_asset/addTransaction.html");
                 } else {
                     webView.loadUrl("file:///android_asset/newPass.html");
                 }
@@ -85,14 +99,27 @@ public class MainActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        Uri selectedFileUri = result.getData().getData();
-                        if (selectedFileUri != null) {
-                            String filePath = String.valueOf(selectedFileUri);
-                            imagePath = filePath;
-                            String jsCode = "handleSelectedFile('" + filePath + "');";
-                            webView.evaluateJavascript(jsCode, null);
-                        } else {
-                            Log.e("YourTag", "Selected file URI is null");
+                        if (Objects.equals(currentOption, "gallery")) {
+                            Uri selectedFileUri = result.getData().getData();
+                            if (selectedFileUri != null) {
+                                String filePath = String.valueOf(selectedFileUri);
+                                imagePath = filePath;
+                                String jsCode = "handleSelectedFile('" + filePath + "');";
+                                webView.evaluateJavascript(jsCode, null);
+                            } else {
+                                Log.e("YourTag", "Selected file URI is null");
+                            }
+                        } else if (Objects.equals(currentOption, "camera")) {
+                            Bundle extras = result.getData().getExtras();
+                            if (extras != null && extras.containsKey("data")) {
+                                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                                tempDirectory = getTempImageDirectory();
+                                tempImagePath = tempDirectory.getAbsolutePath();
+                                System.out.println("Temp image path:" + tempImagePath);
+                                String jsCode = "handleSelectedFile('" + tempImagePath + "');";
+                                webView.evaluateJavascript(jsCode, null);
+                                saveTempImage(imageBitmap);
+                            }
                         }
                     }
                 }
@@ -120,8 +147,11 @@ public class MainActivity extends AppCompatActivity {
                             String sender = smsMessage.getOriginatingAddress();
                             String messageBody = smsMessage.getMessageBody();
                             if (sender != null && sender.trim().equals("MPESA")) {
-                                if (messageBody != null && (messageBody.toLowerCase().contains("confirmed") ||
-                                        messageBody.contains("sent") || messageBody.contains("paid") ||
+                                Log.d(TAG, "Message received " + messageBody);
+                                if (messageBody != null && (messageBody.contains("Confirmed") &&
+                                        messageBody.contains("sent to")|| messageBody.contains("sent") ||
+                                        messageBody.contains("Transaction cost") ||messageBody.contains("paid") ||
+                                        messageBody.contains("SAFARICOM") ||messageBody.contains("Safaricom") ||
                                         messageBody.contains("account") || messageBody.contains("transferred") ||
                                         messageBody.contains("airtime") || messageBody.contains("PMWithdraw") ||
                                         messageBody.contains("You bought"))) {
@@ -137,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
         };
         registerReceiver(smsReceiver, intentFilter);
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -163,12 +192,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
     public boolean isFingerprintAvailable() {
         return true;
     }
-
     public void authenticateWithFingerprint() {
         runOnUiThread(() -> {
             if (isFingerprintAvailable()) {
@@ -214,14 +240,53 @@ public class MainActivity extends AppCompatActivity {
         pdfContent = content;
     }
 
-    public void openFilePicker() {
+    public void openFilePicker(String option) {
         runOnUiThread(() -> {
+            if (Objects.equals(option, "gallery")) {
+                currentOption = "gallery";
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("image/*");
                 filePickerLauncher.launch(intent);
+            } else if (Objects.equals(option, "camera")) {
+                currentOption = "camera";
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                filePickerLauncher.launch(cameraIntent);
+            }
         });
     }
+    public void saveTempImage(Bitmap imageBitmap) {
+        File imageDirectory = new File(getExternalFilesDir(null), "temp");
+        if (!imageDirectory.exists()) {
+            imageDirectory.mkdirs();
+        }
+        String fileName = "temp.jpg";
+        File destinationImageFile = new File(imageDirectory, fileName);
+        if (destinationImageFile.exists()) {
+            boolean deleted = destinationImageFile.delete();
+            if (!deleted) {
+                Log.e("YourTag", "Failed to delete existing file");
+            }
+        }
+        try (OutputStream out = Files.newOutputStream(destinationImageFile.toPath())) {
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            savedImagePath = destinationImageFile.getAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+        }
+    }
+   /*public void openFilePicker() {
+       runOnUiThread(() -> {
+           Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+           galleryIntent.addCategory(Intent.CATEGORY_OPENABLE);
+           galleryIntent.setType("image/*");
+           Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+           Intent chooserIntent = Intent.createChooser(galleryIntent, "Select Source");
+           chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cameraIntent});
+           filePickerLauncher.launch(chooserIntent);
+       });
+   }*/
     public void saveImageToDirectory(String imagePath, String imageName) {
         if (imagePath != null || imageName != null) {
             File imageDirectory = new File(getExternalFilesDir(null), "images");
@@ -269,6 +334,12 @@ public class MainActivity extends AppCompatActivity {
     }
     public static String getImagePath(){
         return imagePath;
+    }
+    private File getTempImageDirectory() {
+        return new File(getExternalFilesDir(null), "temp");
+    }
+    public static String getTempImagePath(){
+        return tempImagePath;
     }
 }
 

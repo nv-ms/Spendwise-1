@@ -302,13 +302,18 @@ public class JavascriptBridge {
         mainActivity.authenticateWithFingerprint();
     }
     @JavascriptInterface
-    public void openFilePicker() {
-        mainActivity.openFilePicker();
+    public void openFilePicker(String choice) {
+        mainActivity.openFilePicker(choice);
     }
     @JavascriptInterface
     public String getImagePath(){
         return MainActivity.getImagePath();
     }
+    @JavascriptInterface
+    public String getImageTempPath(){
+        return MainActivity.getTempImagePath();
+    }
+
     @JavascriptInterface
     public String getAbsoluteImagePath(){
         return mainActivity.getAbsoluteImgPath();
