@@ -427,7 +427,6 @@
             if (imagePath == undefined){
                 imagePath = "notDefined";
             }
-    
             if (javascriptBridge.addTransaction(title, userId, amount, transactionCost ,sentDescription, refDescription, imagePath)) {
                 spinner.style.display = 'none';
                 window.location.href = `Transactions.html?userId=${encodeURIComponent(userId)}`;
