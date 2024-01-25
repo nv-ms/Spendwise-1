@@ -82,8 +82,11 @@ public class MainActivity extends AppCompatActivity {
             Password existingPassword = passwordDao.getPassword();
             runOnUiThread(() -> {
                 if (existingPassword != null) {
+                    //the commented out line is for testing purposes only
                     /*webView.loadUrl("file:///android_asset/password.html");
                     authenticateWithFingerprint();*/
+
+                    //problematic page, attaching images
                     webView.loadUrl("file:///android_asset/addTransaction.html");
                 } else {
                     webView.loadUrl("file:///android_asset/newPass.html");
@@ -95,11 +98,12 @@ public class MainActivity extends AppCompatActivity {
         } else {
             registerSmsReceiver();
         }
-        filePickerLauncher = registerForActivityResult(
+        /*filePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         if (Objects.equals(currentOption, "gallery")) {
+                            System.out.println("Gallery");
                             Uri selectedFileUri = result.getData().getData();
                             if (selectedFileUri != null) {
                                 String filePath = String.valueOf(selectedFileUri);
@@ -123,6 +127,24 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
+        );*/
+        filePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri selectedFileUri = result.getData().getData();
+                        if (selectedFileUri != null) {
+                            String filePath = String.valueOf(selectedFileUri);
+                            imagePath = filePath;
+                            System.out.println(imagePath);
+                            String jsCode = "handleSelectedFile('" + filePath + "');";
+                            webView.evaluateJavascript(jsCode, null);
+                        } else {
+                            Log.e("Tag", "Selected file URI is null");
+                        }
+
+                    }
+                }
         );
     }
     @Override
@@ -132,6 +154,9 @@ public class MainActivity extends AppCompatActivity {
             PDFGenerator.handleActivityResult(resultCode, data.getData(), pdfContent, this);
         }
     }
+
+    // this method does not record the sms well, and if it does, it does not select the whole message
+    //only a portion of it, and at times it doesnt reaad the message at all it just ignores it
     private void registerSmsReceiver() {
         IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
         BroadcastReceiver smsReceiver = new BroadcastReceiver() {
@@ -240,21 +265,28 @@ public class MainActivity extends AppCompatActivity {
         pdfContent = content;
     }
 
-    public void openFilePicker(String option) {
+
+    //filepicker method as well not working well, spawns the camera and not the gallery
+    /*public void openFilePicker(String option) {
         runOnUiThread(() -> {
             if (Objects.equals(option, "gallery")) {
                 currentOption = "gallery";
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+               *//* Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("image/*");
-                filePickerLauncher.launch(intent);
+                filePickerLauncher.launch(intent);*//*
+                Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                galleryIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                galleryIntent.setType("image/*");
+                filePickerLauncher.launch(galleryIntent);
             } else if (Objects.equals(option, "camera")) {
                 currentOption = "camera";
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 filePickerLauncher.launch(cameraIntent);
             }
         });
-    }
+    }*/
+
     public void saveTempImage(Bitmap imageBitmap) {
         File imageDirectory = new File(getExternalFilesDir(null), "temp");
         if (!imageDirectory.exists()) {
@@ -275,6 +307,16 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
         }
+    }
+    public void openFilePicker(String choice) {
+        runOnUiThread(() -> {
+            Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+            galleryIntent.addCategory(Intent.CATEGORY_OPENABLE);
+            galleryIntent.setType("image/*");
+            //startActivityForResult(Intent.createChooser(galleryIntent, "Select Picture"), FILE_PICKER_REQUEST_CODE);
+            Intent chooserIntent = Intent.createChooser(galleryIntent, "Select Source");
+            filePickerLauncher.launch(chooserIntent);
+        });
     }
    /*public void openFilePicker() {
        runOnUiThread(() -> {
