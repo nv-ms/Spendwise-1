@@ -104,6 +104,7 @@ public class JavascriptBridge {
     @JavascriptInterface
     public Boolean addTransaction(String transactionTitle, int userId, long Amount, long transactionCost, String description , String refDescription, String imagePath) {
         String transactionId = generateGUID();
+        System.out.println("imagepath"+ imagePath);
         String imageName = "null";
         if(!Objects.equals(imagePath, "notDefined")){
             imageName = "image_"+transactionId;
@@ -138,7 +139,6 @@ public class JavascriptBridge {
     }
     @JavascriptInterface
     public boolean updateTransaction(String transactionId, String newTitle,long newAmount, long newTransactionCost,String newDescription, String newRefDescription,  String imageProcess,String imagePath, String imageName) {
-        System.out.println("Transaction Cost " + newTransactionCost);
         if(Objects.equals(imageProcess, "delete")){
             deleteImage(imageName);
             imageName = "null";

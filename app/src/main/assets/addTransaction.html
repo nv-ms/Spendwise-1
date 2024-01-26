@@ -181,16 +181,7 @@
             font-size: 16px;
             text-align: center;
         }
-        .spinner{
-            display:none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-        }
+        
         .tAttachment{
             width: 90%;
             margin: 5px;
@@ -274,6 +265,16 @@
             width: 20px;
             height: 20px;
             background-color: white;
+        }
+        .spinner{
+            display:none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
         }
         .loader {
             top: 50%;
@@ -360,7 +361,7 @@
                     <button type="button" class="iconBtn" id="cancelIcon" onclick="toggleIcons();"></button>
                     <div class="funBtn">
                         <button type="button" class="iconBtn" id="cameraIcon" onclick="openFilePicker('camera')"></button>
-                        <button type="button" class="iconBtn" id="galleryIcon" onclick="openFilePicker('galery')"></button>
+                        <button type="button" class="iconBtn" id="galleryIcon" onclick="openFilePicker('gallery')"></button>
                     </div>
                 </div>
                 <button type="button" onclick="clearSelection();" class="clearBtn" id="clearBtn"></button>
@@ -397,6 +398,8 @@
         const clearBtn = document.getElementById('clearBtn');
         const uploadBtn = document.getElementById('uploadBtn');
         const iconsDiv = document.getElementById('iconsDiv');
+
+        var imageOption;
 
         const toggleElements = (action, element) => {
             element.style.display = action === "open" ? "block" : "none";
@@ -442,7 +445,6 @@
                     toggleElements('close', iconsDiv);
                 }
             }       
-
         } 
         const addCashTransaction=()=>{
             const title = document.getElementById("transactionName").value;
@@ -450,7 +452,11 @@
             const transactionCost = parseFloat(document.getElementById("transFee").value);
             const description = document.getElementById("transactionDescription").value;
             const refDescription = "Cash Transaction";
-            imagePath = javascriptBridge.getImagePath();
+            if(imageOption == "gallery"){
+                imagePath = javascriptBridge.getImagePath();
+            }else if(imageOption == "camera"){
+                imagePath = javascriptBridge.getImageTempPath();
+            }
             if (imagePath == undefined){
                 imagePath = "notDefined";
             }
@@ -486,7 +492,11 @@
             const transactionCost = parseFloat(breakMessage(descriptionDetails).transactionCost);
             const sentDescription = description;
             const refDescription = descriptionDetails;
-            imagePath = javascriptBridge.getImagePath();
+            if(imageOption == "gallery"){
+                imagePath = javascriptBridge.getImagePath();
+            }else if(imageOption == "camera"){
+                imagePath = javascriptBridge.getImageTempPath();
+            }
             if (imagePath == undefined){
                 imagePath = "notDefined";
             }
@@ -521,13 +531,13 @@
         }
         
         const openFilePicker = (option)=>{
+            imageOption = option;
             javascriptBridge.openFilePicker(option);
         }
         function handleSelectedFile(filePath) {
             var img = document.createElement("img");
             img.classList.add('image')
-            img.src = filePath + "/temp.jpeg";
-            //img.alt = "Selected Image";
+            img.src = filePath;
 
             const container = document.getElementById("imageContainer");
             container.appendChild(img);

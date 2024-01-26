@@ -4,6 +4,8 @@ import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PHONE_CALL_PERMISSION_REQUEST_CODE = 321;
     private static final int FILE_PICKER_REQUEST_CODE = 123;
     private ActivityResultLauncher<Intent> filePickerLauncher;
+
     public static String imagePath;
     public static String savedImagePath;
     private  static String currentOption;
@@ -82,12 +85,8 @@ public class MainActivity extends AppCompatActivity {
             Password existingPassword = passwordDao.getPassword();
             runOnUiThread(() -> {
                 if (existingPassword != null) {
-                    //the commented out line is for testing purposes only
-                    /*webView.loadUrl("file:///android_asset/password.html");
-                    authenticateWithFingerprint();*/
-
-                    //problematic page, attaching images
-                    webView.loadUrl("file:///android_asset/addTransaction.html");
+                    webView.loadUrl("file:///android_asset/password.html");
+                    authenticateWithFingerprint();
                 } else {
                     webView.loadUrl("file:///android_asset/newPass.html");
                 }
@@ -98,12 +97,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             registerSmsReceiver();
         }
-        /*filePickerLauncher = registerForActivityResult(
+        filePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         if (Objects.equals(currentOption, "gallery")) {
-                            System.out.println("Gallery");
                             Uri selectedFileUri = result.getData().getData();
                             if (selectedFileUri != null) {
                                 String filePath = String.valueOf(selectedFileUri);
@@ -113,39 +111,36 @@ public class MainActivity extends AppCompatActivity {
                             } else {
                                 Log.e("YourTag", "Selected file URI is null");
                             }
-                        } else if (Objects.equals(currentOption, "camera")) {
-                            Bundle extras = result.getData().getExtras();
-                            if (extras != null && extras.containsKey("data")) {
-                                Bitmap imageBitmap = (Bitmap) extras.get("data");
-                                tempDirectory = getTempImageDirectory();
-                                tempImagePath = tempDirectory.getAbsolutePath();
-                                System.out.println("Temp image path:" + tempImagePath);
-                                String jsCode = "handleSelectedFile('" + tempImagePath + "');";
-                                webView.evaluateJavascript(jsCode, null);
-                                saveTempImage(imageBitmap);
+                        }else if (Objects.equals(currentOption, "camera")) {
+                                Bundle extras = result.getData().getExtras();
+                                if (extras != null && extras.containsKey("data")) {
+                                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                                    Uri tempImageUri = saveTempImageAsContentUri(imageBitmap);
+                                    tempImagePath = tempImageUri.toString();
+                                    String jsCode = "handleSelectedFile('" + tempImagePath + "');";
+                                    webView.evaluateJavascript(jsCode, null);
+                                }
                             }
-                        }
-                    }
-                }
-        );*/
-        filePickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        Uri selectedFileUri = result.getData().getData();
-                        if (selectedFileUri != null) {
-                            String filePath = String.valueOf(selectedFileUri);
-                            imagePath = filePath;
-                            System.out.println(imagePath);
-                            String jsCode = "handleSelectedFile('" + filePath + "');";
-                            webView.evaluateJavascript(jsCode, null);
-                        } else {
-                            Log.e("Tag", "Selected file URI is null");
-                        }
 
-                    }
+                        }
                 }
         );
+    }
+    private Uri saveTempImageAsContentUri(Bitmap imageBitmap) {
+        ContentResolver contentResolver = getContentResolver();
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        Uri contentUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        try {
+            OutputStream outputStream = contentResolver.openOutputStream(contentUri);
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return contentUri;
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -154,9 +149,6 @@ public class MainActivity extends AppCompatActivity {
             PDFGenerator.handleActivityResult(resultCode, data.getData(), pdfContent, this);
         }
     }
-
-    // this method does not record the sms well, and if it does, it does not select the whole message
-    //only a portion of it, and at times it doesnt reaad the message at all it just ignores it
     private void registerSmsReceiver() {
         IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
         BroadcastReceiver smsReceiver = new BroadcastReceiver() {
@@ -167,23 +159,29 @@ public class MainActivity extends AppCompatActivity {
                     if (bundle != null) {
                         Object[] pdus = (Object[]) bundle.get("pdus");
                         assert pdus != null;
+                        StringBuilder concatenatedMessage = new StringBuilder();
+
+                        SmsMessage smsMessage = null;
                         for (Object pdu : pdus) {
-                            SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) pdu);
-                            String sender = smsMessage.getOriginatingAddress();
-                            String messageBody = smsMessage.getMessageBody();
-                            if (sender != null && sender.trim().equals("MPESA")) {
-                                Log.d(TAG, "Message received " + messageBody);
-                                if (messageBody != null && (messageBody.contains("Confirmed") &&
-                                        messageBody.contains("sent to")|| messageBody.contains("sent") ||
-                                        messageBody.contains("Transaction cost") ||messageBody.contains("paid") ||
-                                        messageBody.contains("SAFARICOM") ||messageBody.contains("Safaricom") ||
-                                        messageBody.contains("account") || messageBody.contains("transferred") ||
-                                        messageBody.contains("airtime") || messageBody.contains("PMWithdraw") ||
-                                        messageBody.contains("You bought"))) {
-                                    String jsFunction = "receivedSMS('" + messageBody + "');";
-                                    WebView webView = findViewById(R.id.webview);
-                                    webView.evaluateJavascript(jsFunction, null);
-                                }
+                            smsMessage = SmsMessage.createFromPdu((byte[]) pdu);
+                            concatenatedMessage.append(smsMessage.getMessageBody());
+                        }
+
+                        assert smsMessage != null;
+                        String sender = smsMessage.getOriginatingAddress();
+                        String messageBody = concatenatedMessage.toString();
+
+                        if (sender != null && sender.trim().equals("MPESA")) {
+                            Log.d(TAG, "Message received " + messageBody);
+                            if (messageBody.contains("Confirmed") && messageBody.contains("sent to") ||
+                                    messageBody.contains("sent") || messageBody.contains("Transaction cost") ||
+                                    messageBody.contains("paid") || messageBody.contains("SAFARICOM") ||
+                                    messageBody.contains("Safaricom") || messageBody.contains("account") ||
+                                    messageBody.contains("transferred") || messageBody.contains("airtime") ||
+                                    messageBody.contains("PMWithdraw") || messageBody.contains("You bought")) {
+                                String jsFunction = "receivedSMS('" + messageBody + "');";
+                                WebView webView = findViewById(R.id.webview);
+                                webView.evaluateJavascript(jsFunction, null);
                             }
                         }
                     }
@@ -192,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
         };
         registerReceiver(smsReceiver, intentFilter);
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -264,71 +263,50 @@ public class MainActivity extends AppCompatActivity {
     public void setPdfContent(String content) {
         pdfContent = content;
     }
-
-
-    //filepicker method as well not working well, spawns the camera and not the gallery
-    /*public void openFilePicker(String option) {
-        runOnUiThread(() -> {
-            if (Objects.equals(option, "gallery")) {
-                currentOption = "gallery";
-               *//* Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("image/*");
-                filePickerLauncher.launch(intent);*//*
-                Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                galleryIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                galleryIntent.setType("image/*");
-                filePickerLauncher.launch(galleryIntent);
-            } else if (Objects.equals(option, "camera")) {
-                currentOption = "camera";
-                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                filePickerLauncher.launch(cameraIntent);
-            }
-        });
-    }*/
-
-    public void saveTempImage(Bitmap imageBitmap) {
+    public Uri saveTempImage(Bitmap imageBitmap) {
         File imageDirectory = new File(getExternalFilesDir(null), "temp");
         if (!imageDirectory.exists()) {
             imageDirectory.mkdirs();
         }
-        String fileName = "temp.jpg";
+        String fileName = "temp" + System.currentTimeMillis() + "jpg";
         File destinationImageFile = new File(imageDirectory, fileName);
         if (destinationImageFile.exists()) {
             boolean deleted = destinationImageFile.delete();
             if (!deleted) {
-                Log.e("YourTag", "Failed to delete existing file");
+                Log.e("Tag", "Failed to delete existing file");
             }
         }
         try (OutputStream out = Files.newOutputStream(destinationImageFile.toPath())) {
             imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             savedImagePath = destinationImageFile.getAbsolutePath();
+            return Uri.fromFile(destinationImageFile);
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println(e);
             Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+            return null;
         }
     }
     public void openFilePicker(String choice) {
         runOnUiThread(() -> {
-            Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-            galleryIntent.addCategory(Intent.CATEGORY_OPENABLE);
-            galleryIntent.setType("image/*");
-            //startActivityForResult(Intent.createChooser(galleryIntent, "Select Picture"), FILE_PICKER_REQUEST_CODE);
-            Intent chooserIntent = Intent.createChooser(galleryIntent, "Select Source");
-            filePickerLauncher.launch(chooserIntent);
+            if(Objects.equals(choice, "gallery")){
+                currentOption = "gallery";
+                Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                galleryIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                galleryIntent.setType("image/*");
+                filePickerLauncher.launch(galleryIntent);
+            }else if(Objects.equals(choice, "camera")){
+                currentOption = "camera";
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+                    filePickerLauncher.launch(cameraIntent);
+                } else {
+                    Toast.makeText(this, "We are having issues contacting your camera.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
         });
     }
-   /*public void openFilePicker() {
-       runOnUiThread(() -> {
-           Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-           galleryIntent.addCategory(Intent.CATEGORY_OPENABLE);
-           galleryIntent.setType("image/*");
-           Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-           Intent chooserIntent = Intent.createChooser(galleryIntent, "Select Source");
-           chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cameraIntent});
-           filePickerLauncher.launch(chooserIntent);
-       });
-   }*/
     public void saveImageToDirectory(String imagePath, String imageName) {
         if (imagePath != null || imageName != null) {
             File imageDirectory = new File(getExternalFilesDir(null), "images");
@@ -347,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
                 savedImagePath = destinationImageFile.getAbsolutePath();
             } catch (IOException e) {
                 e.printStackTrace();
-                Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Error", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -357,12 +335,7 @@ public class MainActivity extends AppCompatActivity {
         File imageFileToDelete = new File(imageDirectory, fullFileName);
 
         if (imageFileToDelete.exists()) {
-            boolean deleted = imageFileToDelete.delete();
-            if (deleted) {
-                return true;
-            } else {
-                return false;
-            }
+            return imageFileToDelete.delete();
         } else {
             return false;
         }
