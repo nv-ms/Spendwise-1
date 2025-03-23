@@ -322,5 +322,4 @@ public class JavascriptBridge {
     public boolean deleteImage(String imageName){
         return mainActivity.deleteImageFile(imageName);
     }
-
 }
